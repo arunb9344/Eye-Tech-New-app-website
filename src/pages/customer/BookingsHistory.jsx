@@ -139,24 +139,24 @@ const BookingsHistory = () => {
                           Booked on: {formatDate(booking.bookingDate, booking.createdAt)}
                         </p>
                         
-                        <div className="flex items-center gap-2 mt-3 flex-wrap" style={{ width: '100%' }}>
+                        <div className="flex flex-wrap gap-2 mt-3" style={{ width: '100%' }}>
                           <span className="tag" style={{ 
                             background: `${statusColor}15`, 
                             color: statusColor, 
                             border: `1px solid ${statusColor}33`,
-                            fontSize: '0.7rem'
+                            fontSize: '0.65rem'
                           }}>
                             {booking.status || 'Pending'}
                           </span>
                           {booking.chargeType && (
-                            <span className="tag tag-outline" style={{ fontSize: '0.7rem' }}>{booking.chargeType}</span>
+                            <span className="tag tag-outline" style={{ fontSize: '0.65rem' }}>{booking.chargeType}</span>
                           )}
                           <span className={`tag ${booking.isEyeTechInstalled ? 'tag-success' : 'tag-outline'}`} style={{ 
-                            fontSize: '0.7rem', 
+                            fontSize: '0.65rem', 
                             background: booking.isEyeTechInstalled ? 'rgba(46, 204, 113, 0.1)' : 'rgba(255,255,255,0.05)',
                             color: booking.isEyeTechInstalled ? '#2ecc71' : 'var(--text-muted)'
                           }}>
-                            {booking.isEyeTechInstalled ? 'Eye Tech' : 'Non-Eye Tech'}
+                            {booking.isEyeTechInstalled ? 'Eye Tech Installed' : 'Non-Eye Tech Installed'}
                           </span>
                         </div>
                       </div>
