@@ -62,13 +62,14 @@ const AddressFormModal = ({ isOpen, onClose, onAddressSaved, editingAddress = nu
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.7)', backdropFilter: 'blur(8px)',
+      backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(10px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       zIndex: 2000, padding: '20px'
     }}>
       <div className="glass-panel animate-fade-in" style={{ 
         width: '100%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto',
-        padding: '32px', position: 'relative' 
+        padding: '32px', position: 'relative',
+        background: 'rgba(30, 30, 50, 0.95)', border: '1px solid rgba(255,255,255,0.2)'
       }}>
         <div className="flex justify-between items-center mb-6">
           <h2 style={{ margin: 0 }}>{editingAddress ? 'Edit Address' : 'Add New Address'}</h2>
