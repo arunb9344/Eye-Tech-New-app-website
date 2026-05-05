@@ -212,7 +212,7 @@ const BookInstallation = () => {
       <AddressModal 
         isOpen={showAddressModal} 
         onClose={() => setShowAddressModal(false)} 
-        onAddressAdded={handleAddressAdded} 
+        onAddressSaved={handleAddressAdded} 
       />
     </div>
   );

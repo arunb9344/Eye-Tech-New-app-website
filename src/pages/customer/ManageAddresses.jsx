@@ -3,25 +3,15 @@ import { useAuth } from '../../context/AuthContext';
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { MapPin, Plus, Trash2, ShieldCheck, X, Edit2 } from 'lucide-react';
+import AddressModal from '../../components/AddressModal';
 
 const ManageAddresses = () => {
   const { currentUser } = useAuth();
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  
-  // Form State
-  const [editingId, setEditingId] = useState(null);
-  const [label, setLabel] = useState('');
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [addressLine1, setAddressLine1] = useState('');
-  const [addressLine2, setAddressLine2] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [pincode, setPincode] = useState('');
-  const [gstNumber, setGstNumber] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [selectedAddressForEdit, setSelectedAddressForEdit] = useState(null);
 
   const fetchAddresses = async () => {
     setLoading(true);
@@ -41,62 +31,18 @@ const ManageAddresses = () => {
     if (currentUser) fetchAddresses();
   }, [currentUser]);
 
-  const handleSaveAddress = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      const addressData = {
-        userId: currentUser.uid,
-        label,
-        name,
-        phone,
-        addressLine1,
-        addressLine2,
-        city,
-        state,
-        pincode,
-        gstNumber,
-        isEyeTechInstalled: editingId ? addresses.find(a => a.id === editingId)?.isEyeTechInstalled : false,
-        updatedAt: new Date().toISOString()
-      };
-
-      if (editingId) {
-        await updateDoc(doc(db, 'addresses', editingId), addressData);
-      } else {
-        addressData.createdAt = new Date().toISOString();
-        addressData.freeServiceVisitsRemaining = 0;
-        addressData.maxFreeServiceVisits = 0;
-        await addDoc(collection(db, 'addresses'), addressData);
-      }
-
-      setShowForm(false);
-      setEditingId(null);
-      resetForm();
-      fetchAddresses();
-    } catch (err) {
-      console.error("Error saving address", err);
-      alert("Failed to save address.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const resetForm = () => {
-    setLabel(''); setName(''); setPhone(''); setAddressLine1(''); setAddressLine2('');
-    setCity(''); setState(''); setPincode(''); setGstNumber('');
+  const handleAddressSaved = () => {
+    fetchAddresses();
+    setSelectedAddressForEdit(null);
   };
 
   const handleEdit = (address) => {
-    setEditingId(address.id);
-    setLabel(address.label || '');
-    setName(address.name || '');
-    setPhone(address.phone || '');
-    setAddressLine1(address.addressLine1 || address.street || '');
-    setAddressLine2(address.addressLine2 || '');
-    setCity(address.city || '');
-    setState(address.state || '');
-    setPincode(address.pincode || '');
-    setGstNumber(address.gstNumber || '');
+    setSelectedAddressForEdit(address);
+    setShowForm(true);
+  };
+
+  const handleAddNew = () => {
+    setSelectedAddressForEdit(null);
     setShowForm(true);
   };
 
@@ -119,63 +65,18 @@ const ManageAddresses = () => {
           <p className="mb-0">Add and manage your installation locations.</p>
         </div>
         {!showForm && (
-          <button onClick={() => setShowForm(true)} className="btn btn-primary">
+          <button onClick={handleAddNew} className="btn btn-primary">
             <Plus size={18} /> Add New Address
           </button>
         )}
       </div>
 
-      {showForm && (
-        <div className="glass-panel animate-fade-in mb-8" style={{ padding: '24px' }}>
-          <div className="flex justify-between items-center mb-4">
-            <h3 style={{ margin: 0 }}>{editingId ? 'Edit Address' : 'Add New Address'}</h3>
-            <button onClick={() => setShowForm(false)} className="btn btn-outline" style={{ padding: '8px' }}>
-              <X size={18} />
-            </button>
-          </div>
-          <form onSubmit={handleSaveAddress} className="grid-2x2 gap-4">
-            <div className="flex flex-col gap-1">
-              <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Address Label (e.g. Home, Office)</label>
-              <input type="text" value={label} onChange={(e) => setLabel(e.target.value)} required placeholder="My Home" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Contact Person Name</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Full Name" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Phone Number</label>
-              <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} required placeholder="Contact for this location" />
-            </div>
-            <div className="flex flex-col gap-1" style={{ gridColumn: '1 / -1' }}>
-              <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Street Address (Line 1)</label>
-              <input type="text" value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} required />
-            </div>
-            <div className="flex flex-col gap-1" style={{ gridColumn: '1 / -1' }}>
-              <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Apartment/Suite (Line 2 - Optional)</label>
-              <input type="text" value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>City / District</label>
-              <input type="text" value={city} onChange={(e) => setCity(e.target.value)} required />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>State</label>
-              <input type="text" value={state} onChange={(e) => setState(e.target.value)} required />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Pincode</label>
-              <input type="text" value={pincode} onChange={(e) => setPincode(e.target.value)} required />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>GST Number (Optional)</label>
-              <input type="text" value={gstNumber} onChange={(e) => setGstNumber(e.target.value)} placeholder="For business invoices" />
-            </div>
-            <button type="submit" className="btn btn-primary" style={{ gridColumn: '1 / -1', marginTop: '12px' }} disabled={submitting}>
-              {submitting ? 'Saving...' : editingId ? 'Update Address' : 'Save Address'}
-            </button>
-          </form>
-        </div>
-      )}
+      <AddressModal 
+        isOpen={showForm} 
+        onClose={() => setShowForm(false)} 
+        onAddressSaved={handleAddressSaved}
+        initialData={selectedAddressForEdit}
+      />
 
       {loading ? (
         <p>Loading addresses...</p>
