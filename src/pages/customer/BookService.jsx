@@ -24,7 +24,11 @@ const BookService = () => {
         const snapshot = await getDocs(q);
         const fetchedAddrs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setAddresses(fetchedAddrs);
-        if (fetchedAddrs.length > 0 && !selectedAddressId) setSelectedAddressId(fetchedAddrs[0].id);
+        
+        // Only set default if not already set
+        if (fetchedAddrs.length > 0) {
+          setSelectedAddressId(prev => prev || fetchedAddrs[0].id);
+        }
 
         const amcQ = query(collection(db, 'purchased_amcs'), where('userId', '==', currentUser.uid));
         const amcSnap = await getDocs(amcQ);
@@ -41,7 +45,7 @@ const BookService = () => {
       }
     };
     if (currentUser) fetchData();
-  }, [currentUser, selectedAddressId]);
+  }, [currentUser]);
 
   const handleAddressAdded = (newAddr) => {
     setAddresses(prev => [...prev, newAddr]);

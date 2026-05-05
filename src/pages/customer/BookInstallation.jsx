@@ -23,7 +23,9 @@ const BookInstallation = () => {
         const snapshot = await getDocs(q);
         const fetchedAddrs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setAddresses(fetchedAddrs);
-        if (fetchedAddrs.length > 0 && !selectedAddressId) setSelectedAddressId(fetchedAddrs[0].id);
+        if (fetchedAddrs.length > 0) {
+          setSelectedAddressId(prev => prev || fetchedAddrs[0].id);
+        }
       } catch (err) {
         console.error("Error fetching addresses", err);
       } finally {
@@ -31,7 +33,7 @@ const BookInstallation = () => {
       }
     };
     if (currentUser) fetchData();
-  }, [currentUser, selectedAddressId]);
+  }, [currentUser]);
 
   const handleAddressAdded = (newAddr) => {
     setAddresses(prev => [...prev, newAddr]);
