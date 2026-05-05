@@ -1,0 +1,11 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "in.eyetechsecurities.app.twa",
+      "sha256_cert_fingerprints":
+        ["56:70:2A:20:38:60:08:A0:DB:4F:55:0C:82:A2:EC:90:1A:8D:45:95:86:62:43:50:28:31:37:F8:9B:95:4B:C1", "BF:40:96:8D:62:39:10:F9:2A:A8:4D:21:DE:FF:5E:7F:F6:CA:00:54:44:EA:D2:9E:ED:8E:4C:04:F6:EE:1E:59"]
+    }
+  }
+]
