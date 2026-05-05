@@ -212,8 +212,8 @@ const ManageAMC = () => {
                         </div>
                         <div>
                           <div className="flex items-center gap-3">
-                            <h3 style={{ margin: 0 }}>{amc.packageName}</h3>
-                            <span className={`tag ${isApproved ? 'tag-success' : 'tag-warning'}`} style={{ fontSize: '0.7rem' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{amc.packageName}</h3>
+                            <span className={`tag ${isApproved ? 'tag-success' : 'tag-warning'}`} style={{ fontSize: '0.65rem' }}>
                               {amc.status}
                             </span>
                           </div>

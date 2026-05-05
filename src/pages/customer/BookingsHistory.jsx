@@ -117,13 +117,9 @@ const BookingsHistory = () => {
             return (
               <div key={booking.id} className="glass-panel" style={{ padding: 0, overflow: 'hidden' }}>
                 {/* Header Section */}
-                <div 
-                  style={{ padding: '24px', cursor: 'pointer' }}
-                  onClick={() => setExpandedId(isExpanded ? null : booking.id)}
-                >
-                  <div className="flex flex-col md:flex-row justify-between gap-4">
-                    <div className="flex gap-5">
-                      <div style={{ 
+                <div className="flex flex-col md:flex-row justify-between gap-4 booking-header" style={{ padding: '24px', cursor: 'pointer' }} onClick={() => setExpandedId(isExpanded ? null : booking.id)}>
+                    <div className="flex gap-4">
+                      <div className="booking-icon-box" style={{ 
                         background: booking.type === 'Service' ? 'rgba(0, 206, 201, 0.1)' : 'rgba(255, 118, 117, 0.1)', 
                         padding: '16px', 
                         borderRadius: '16px',
@@ -132,35 +128,30 @@ const BookingsHistory = () => {
                         {booking.type === 'Service' ? <Wrench size={24} color="var(--color-secondary)" /> : <Hammer size={24} color="#ff7675" />}
                       </div>
                       <div>
-                        <div className="flex items-center gap-3 mb-1">
-                          <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>{booking.type} Booking</h3>
-                          <span style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px', color: 'var(--text-muted)' }}>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1">
+                          <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>{booking.type} Booking</h3>
+                          <span className="tag tag-outline" style={{ fontSize: '0.65rem', padding: '2px 6px' }}>
                             ID: {booking.id.slice(-8).toUpperCase()}
                           </span>
                         </div>
-                        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 500 }}>
+                        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 500 }}>
                           Booked on: {formatDate(booking.bookingDate, booking.createdAt)}
                         </p>
                         
-                        <div className="flex gap-2 mt-3 flex-wrap">
-                          <span style={{ 
-                            padding: '4px 12px', 
+                        <div className="flex items-center gap-2 mt-3 flex-wrap">
+                          <span className="tag" style={{ 
                             background: `${statusColor}15`, 
                             color: statusColor, 
-                            borderRadius: '8px', 
-                            fontSize: '0.75rem', 
-                            fontWeight: 800,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.5px',
-                            border: `1px solid ${statusColor}33`
+                            border: `1px solid ${statusColor}33`,
+                            fontSize: '0.7rem'
                           }}>
                             {booking.status || 'Pending'}
                           </span>
                           {booking.chargeType && (
-                            <span className="tag tag-outline" style={{ fontSize: '0.75rem' }}>{booking.chargeType}</span>
+                            <span className="tag tag-outline" style={{ fontSize: '0.7rem' }}>{booking.chargeType}</span>
                           )}
                           <span className={`tag ${booking.isEyeTechInstalled ? 'tag-success' : 'tag-outline'}`} style={{ 
-                            fontSize: '0.75rem', 
+                            fontSize: '0.7rem', 
                             background: booking.isEyeTechInstalled ? 'rgba(46, 204, 113, 0.1)' : 'rgba(255,255,255,0.05)',
                             color: booking.isEyeTechInstalled ? '#2ecc71' : 'var(--text-muted)'
                           }}>
