@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { collection, query, where, getDocs, addDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { MapPin, Info, ArrowRight, CheckCircle, AlertTriangle, ShieldCheck, Plus, Zap } from 'lucide-react';
-import AddressModal from '../../components/AddressModal';
+import AddressFormModal from '../../components/AddressFormModal';
 
 const BookService = () => {
   const { currentUser, userData } = useAuth();
@@ -14,50 +14,52 @@ const BookService = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [pricing, setPricing] = useState({ eyeTechServicePrice: 300, nonEyeTechServicePrice: 500 });
   const [showAddressModal, setShowAddressModal] = useState(false);
+  const [pricing, setPricing] = useState({ eyeTechServicePrice: 300, nonEyeTechServicePrice: 500 });
+
+  const fetchData = async () => {
+    try {
+      const q = query(collection(db, 'addresses'), where('userId', '==', currentUser.uid));
+      const snapshot = await getDocs(q);
+      const fetchedAddrs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setAddresses(fetchedAddrs);
+      
+      if (fetchedAddrs.length > 0 && !selectedAddressId) {
+        setSelectedAddressId(fetchedAddrs[0].id);
+      } else if (selectedAddressId && !fetchedAddrs.find(a => a.id === selectedAddressId)) {
+        setSelectedAddressId(fetchedAddrs.length > 0 ? fetchedAddrs[0].id : '');
+      }
+
+      const amcQ = query(collection(db, 'purchased_amcs'), where('userId', '==', currentUser.uid));
+      const amcSnap = await getDocs(amcQ);
+      setPurchasedAmcs(amcSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+
+      const priceSnap = await getDoc(doc(db, 'app_config', 'pricing'));
+      if (priceSnap.exists()) {
+        setPricing(priceSnap.data());
+      }
+    } catch (err) {
+      console.error("Error fetching data", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const q = query(collection(db, 'addresses'), where('userId', '==', currentUser.uid));
-        const snapshot = await getDocs(q);
-        const fetchedAddrs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setAddresses(fetchedAddrs);
-        
-        // Only set default if not already set
-        if (fetchedAddrs.length > 0) {
-          setSelectedAddressId(prev => prev || fetchedAddrs[0].id);
-        }
-
-        const amcQ = query(collection(db, 'purchased_amcs'), where('userId', '==', currentUser.uid));
-        const amcSnap = await getDocs(amcQ);
-        setPurchasedAmcs(amcSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-
-        const priceSnap = await getDoc(doc(db, 'app_config', 'pricing'));
-        if (priceSnap.exists()) {
-          setPricing(priceSnap.data());
-        }
-      } catch (err) {
-        console.error("Error fetching data", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     if (currentUser) fetchData();
   }, [currentUser]);
 
-  const handleAddressAdded = (newAddr) => {
-    setAddresses(prev => [...prev, newAddr]);
-    setSelectedAddressId(newAddr.id);
+  const handleAddressSaved = (newId) => {
+    setSelectedAddressId(newId);
+    fetchData();
   };
 
-  const selectedAddress = addresses.find(a => a.id === selectedAddressId) || null;
+  const selectedAddress = addresses.find(a => a.id === selectedAddressId);
   
-  const isFreeServiceValid = !!(selectedAddress && 
+  const isFreeServiceValid = selectedAddress && 
     selectedAddress.freeServiceValidUntil && 
     selectedAddress.freeServiceValidUntil > Date.now() &&
-    selectedAddress.freeServiceVisitsRemaining > 0);
+    selectedAddress.freeServiceVisitsRemaining > 0;
 
   const applicableAmc = selectedAddress ? purchasedAmcs.find(amc => 
     amc.addressId === selectedAddress.id && 
@@ -71,9 +73,7 @@ const BookService = () => {
     : applicableAmc ? 'AMC:Breakdown'
     : 'Chargeable';
 
-  const price = (selectedAddress?.isEyeTechInstalled) 
-    ? (pricing?.eyeTechServicePrice || 300) 
-    : (pricing?.nonEyeTechServicePrice || 500);
+  const price = selectedAddress?.isEyeTechInstalled ? pricing.eyeTechServicePrice : pricing.nonEyeTechServicePrice;
 
   const getInfoDisplay = () => {
     if (!selectedAddress) return { 
@@ -85,7 +85,7 @@ const BookService = () => {
     };
     
     if (isFreeServiceValid) {
-      const dateStr = selectedAddress.freeServiceValidUntil ? new Date(selectedAddress.freeServiceValidUntil).toLocaleDateString() : 'N/A';
+      const dateStr = new Date(selectedAddress.freeServiceValidUntil).toLocaleDateString();
       return { 
         message: `Eligible for Free Service: ${selectedAddress.freeServiceVisitsRemaining} visits left until ${dateStr}.`,
         icon: <Zap size={20} />,
@@ -97,7 +97,7 @@ const BookService = () => {
     
     if (applicableAmc) {
       return {
-        message: `Covered under AMC: ${applicableAmc.packageName || 'Active Package'} (${applicableAmc.breakdownVisitsLeft} visits left).`,
+        message: `Covered under AMC: ${applicableAmc.packageName} (${applicableAmc.breakdownVisitsLeft} visits left).`,
         icon: <ShieldCheck size={20} />,
         gradient: 'linear-gradient(135deg, rgba(52, 152, 219, 0.2) 0%, rgba(41, 128, 185, 0.1) 100%)',
         border: 'rgba(52, 152, 219, 0.3)',
@@ -227,7 +227,7 @@ const BookService = () => {
                   type="button"
                   onClick={() => setShowAddressModal(true)} 
                   className="flex items-center gap-1" 
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--color-primary-light)', fontWeight: 500 }}
+                  style={{ background: 'none', border: 'none', fontSize: '0.85rem', color: 'var(--color-primary-light)', fontWeight: 500, cursor: 'pointer' }}
                 >
                   <Plus size={14} /> Add New Address
                 </button>
@@ -240,7 +240,7 @@ const BookService = () => {
                 style={{ width: '100%' }}
               >
                 {addresses.length === 0 ? (
-                  <option disabled value="">No addresses found</option>
+                  <option disabled>No addresses found</option>
                 ) : (
                   addresses.map(addr => (
                     <option key={addr.id} value={addr.id}>
@@ -304,10 +304,11 @@ const BookService = () => {
           </form>
         )}
       </div>
-      <AddressModal 
+
+      <AddressFormModal 
         isOpen={showAddressModal} 
-        onClose={() => setShowAddressModal(false)} 
-        onAddressSaved={handleAddressAdded} 
+        onClose={() => setShowAddressModal(false)}
+        onAddressSaved={handleAddressSaved}
       />
     </div>
   );

@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { collection, query, where, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { MapPin, Plus, Trash2, ShieldCheck, X, Edit2 } from 'lucide-react';
-import AddressModal from '../../components/AddressModal';
+import { MapPin, Plus, Trash2, ShieldCheck, Edit2 } from 'lucide-react';
+import AddressFormModal from '../../components/AddressFormModal';
 
 const ManageAddresses = () => {
   const { currentUser } = useAuth();
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [selectedAddressForEdit, setSelectedAddressForEdit] = useState(null);
+  const [editingAddress, setEditingAddress] = useState(null);
 
   const fetchAddresses = async () => {
     setLoading(true);
@@ -31,18 +30,13 @@ const ManageAddresses = () => {
     if (currentUser) fetchAddresses();
   }, [currentUser]);
 
-  const handleAddressSaved = () => {
-    fetchAddresses();
-    setSelectedAddressForEdit(null);
-  };
-
   const handleEdit = (address) => {
-    setSelectedAddressForEdit(address);
+    setEditingAddress(address);
     setShowForm(true);
   };
 
   const handleAddNew = () => {
-    setSelectedAddressForEdit(null);
+    setEditingAddress(null);
     setShowForm(true);
   };
 
@@ -64,18 +58,16 @@ const ManageAddresses = () => {
           <h2 className="mb-2">Manage Addresses</h2>
           <p className="mb-0">Add and manage your installation locations.</p>
         </div>
-        {!showForm && (
-          <button onClick={handleAddNew} className="btn btn-primary">
-            <Plus size={18} /> Add New Address
-          </button>
-        )}
+        <button onClick={handleAddNew} className="btn btn-primary">
+          <Plus size={18} /> Add New Address
+        </button>
       </div>
 
-      <AddressModal 
-        isOpen={showForm} 
-        onClose={() => setShowForm(false)} 
-        onAddressSaved={handleAddressSaved}
-        initialData={selectedAddressForEdit}
+      <AddressFormModal 
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        onAddressSaved={() => fetchAddresses()}
+        editingAddress={editingAddress}
       />
 
       {loading ? (

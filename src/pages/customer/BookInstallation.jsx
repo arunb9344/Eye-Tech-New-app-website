@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { MapPin, Info, ArrowRight, CheckCircle, Plus, Hammer } from 'lucide-react';
-import AddressModal from '../../components/AddressModal';
+import AddressFormModal from '../../components/AddressFormModal';
 
 const BookInstallation = () => {
   const { currentUser, userData } = useAuth();
@@ -16,31 +16,35 @@ const BookInstallation = () => {
   const [success, setSuccess] = useState(false);
   const [showAddressModal, setShowAddressModal] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const q = query(collection(db, 'addresses'), where('userId', '==', currentUser.uid));
-        const snapshot = await getDocs(q);
-        const fetchedAddrs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setAddresses(fetchedAddrs);
-        if (fetchedAddrs.length > 0) {
-          setSelectedAddressId(prev => prev || fetchedAddrs[0].id);
-        }
-      } catch (err) {
-        console.error("Error fetching addresses", err);
-      } finally {
-        setLoading(false);
+  const fetchData = async () => {
+    try {
+      const q = query(collection(db, 'addresses'), where('userId', '==', currentUser.uid));
+      const snapshot = await getDocs(q);
+      const fetchedAddrs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setAddresses(fetchedAddrs);
+      
+      if (fetchedAddrs.length > 0 && !selectedAddressId) {
+        setSelectedAddressId(fetchedAddrs[0].id);
+      } else if (selectedAddressId && !fetchedAddrs.find(a => a.id === selectedAddressId)) {
+        setSelectedAddressId(fetchedAddrs.length > 0 ? fetchedAddrs[0].id : '');
       }
-    };
+    } catch (err) {
+      console.error("Error fetching addresses", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (currentUser) fetchData();
   }, [currentUser]);
 
-  const handleAddressAdded = (newAddr) => {
-    setAddresses(prev => [...prev, newAddr]);
-    setSelectedAddressId(newAddr.id);
+  const handleAddressSaved = (newId) => {
+    setSelectedAddressId(newId);
+    fetchData();
   };
 
-  const selectedAddress = addresses.find(a => a.id === selectedAddressId) || null;
+  const selectedAddress = addresses.find(a => a.id === selectedAddressId);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -129,7 +133,7 @@ const BookInstallation = () => {
                   type="button"
                   onClick={() => setShowAddressModal(true)} 
                   className="flex items-center gap-1" 
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--color-primary-light)', fontWeight: 500 }}
+                  style={{ background: 'none', border: 'none', fontSize: '0.85rem', color: 'var(--color-primary-light)', fontWeight: 500, cursor: 'pointer' }}
                 >
                   <Plus size={14} /> Add New Address
                 </button>
@@ -142,7 +146,7 @@ const BookInstallation = () => {
                 style={{ width: '100%' }}
               >
                 {addresses.length === 0 ? (
-                  <option disabled value="">No addresses found</option>
+                  <option value="" disabled>No addresses found</option>
                 ) : (
                   addresses.map(addr => (
                     <option key={addr.id} value={addr.id}>
@@ -211,10 +215,11 @@ const BookInstallation = () => {
           </form>
         )}
       </div>
-      <AddressModal 
+
+      <AddressFormModal 
         isOpen={showAddressModal} 
-        onClose={() => setShowAddressModal(false)} 
-        onAddressSaved={handleAddressAdded} 
+        onClose={() => setShowAddressModal(false)}
+        onAddressSaved={handleAddressSaved}
       />
     </div>
   );
