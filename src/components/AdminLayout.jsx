@@ -24,9 +24,12 @@ const AdminLayout = () => {
   return (
     <div className="app-container">
       <div className="glass-panel animate-fade-in" style={{ width: '250px', margin: '20px', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '20px', borderBottom: 'var(--glass-border)' }}>
-          <h3 style={{ margin: 0, color: 'var(--color-secondary)' }}>Eye Tech</h3>
-          <p style={{ margin: 0, fontSize: '0.85rem' }}>Admin Dashboard</p>
+        <div style={{ padding: '20px', borderBottom: 'var(--glass-border)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--color-secondary)' }} />
+          <div>
+            <h3 style={{ margin: 0, color: 'var(--color-secondary)', fontSize: '1.1rem' }}>Eye Tech</h3>
+            <p style={{ margin: 0, fontSize: '0.75rem', opacity: 0.8 }}>Admin Dashboard</p>
+          </div>
         </div>
         
         <div style={{ flex: 1, padding: '20px 10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>

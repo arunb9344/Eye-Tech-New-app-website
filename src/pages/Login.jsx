@@ -63,8 +63,8 @@ const Login = () => {
     <div className="flex items-center justify-center min-h-screen" style={{ padding: '20px' }}>
       <div className="glass-panel animate-fade-in" style={{ width: '100%', maxWidth: '420px', padding: '2.5rem' }}>
         <div className="flex flex-col items-center mb-8 gap-4">
-          <div className="flex items-center justify-center" style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', color: 'white' }}>
-            <Shield size={32} />
+          <div className="flex items-center justify-center" style={{ width: '80px', height: '80px', borderRadius: '50%', overflow: 'hidden', border: '2px solid var(--color-primary-light)' }}>
+            <img src="/logo.png" alt="Eye Tech Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <h2 style={{ margin: 0 }}>Eye Tech Securities</h2>
           <p style={{ margin: 0, textAlign: 'center' }}>Secure Access Portal</p>
