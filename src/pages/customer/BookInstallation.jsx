@@ -40,7 +40,7 @@ const BookInstallation = () => {
     setSelectedAddressId(newAddr.id);
   };
 
-  const selectedAddress = addresses.find(a => a.id === selectedAddressId);
+  const selectedAddress = addresses.find(a => a.id === selectedAddressId) || null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

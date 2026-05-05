@@ -52,12 +52,12 @@ const BookService = () => {
     setSelectedAddressId(newAddr.id);
   };
 
-  const selectedAddress = addresses.find(a => a.id === selectedAddressId);
+  const selectedAddress = addresses.find(a => a.id === selectedAddressId) || null;
   
-  const isFreeServiceValid = selectedAddress && 
+  const isFreeServiceValid = !!(selectedAddress && 
     selectedAddress.freeServiceValidUntil && 
     selectedAddress.freeServiceValidUntil > Date.now() &&
-    selectedAddress.freeServiceVisitsRemaining > 0;
+    selectedAddress.freeServiceVisitsRemaining > 0);
 
   const applicableAmc = selectedAddress ? purchasedAmcs.find(amc => 
     amc.addressId === selectedAddress.id && 
@@ -71,7 +71,9 @@ const BookService = () => {
     : applicableAmc ? 'AMC:Breakdown'
     : 'Chargeable';
 
-  const price = selectedAddress?.isEyeTechInstalled ? pricing.eyeTechServicePrice : pricing.nonEyeTechServicePrice;
+  const price = (selectedAddress?.isEyeTechInstalled) 
+    ? (pricing?.eyeTechServicePrice || 300) 
+    : (pricing?.nonEyeTechServicePrice || 500);
 
   const getInfoDisplay = () => {
     if (!selectedAddress) return { 
@@ -83,7 +85,7 @@ const BookService = () => {
     };
     
     if (isFreeServiceValid) {
-      const dateStr = new Date(selectedAddress.freeServiceValidUntil).toLocaleDateString();
+      const dateStr = selectedAddress.freeServiceValidUntil ? new Date(selectedAddress.freeServiceValidUntil).toLocaleDateString() : 'N/A';
       return { 
         message: `Eligible for Free Service: ${selectedAddress.freeServiceVisitsRemaining} visits left until ${dateStr}.`,
         icon: <Zap size={20} />,
@@ -95,7 +97,7 @@ const BookService = () => {
     
     if (applicableAmc) {
       return {
-        message: `Covered under AMC: ${applicableAmc.packageName} (${applicableAmc.breakdownVisitsLeft} visits left).`,
+        message: `Covered under AMC: ${applicableAmc.packageName || 'Active Package'} (${applicableAmc.breakdownVisitsLeft} visits left).`,
         icon: <ShieldCheck size={20} />,
         gradient: 'linear-gradient(135deg, rgba(52, 152, 219, 0.2) 0%, rgba(41, 128, 185, 0.1) 100%)',
         border: 'rgba(52, 152, 219, 0.3)',
