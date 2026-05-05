@@ -118,28 +118,33 @@ const BookingsHistory = () => {
               <div key={booking.id} className="glass-panel" style={{ padding: 0, overflow: 'hidden' }}>
                 {/* Header Section */}
                   <div className="flex flex-col md:flex-row justify-between gap-4 booking-header" style={{ padding: '24px', cursor: 'pointer' }} onClick={() => setExpandedId(isExpanded ? null : booking.id)}>
-                    <div className="flex gap-4" style={{ minWidth: 0, width: '100%' }}>
-                      <div className="booking-icon-box" style={{ 
-                        background: booking.type === 'Service' ? 'rgba(0, 206, 201, 0.1)' : 'rgba(255, 118, 117, 0.1)', 
-                        padding: '16px', 
-                        borderRadius: '16px',
-                        height: 'fit-content',
-                        flexShrink: 0
-                      }}>
-                        {booking.type === 'Service' ? <Wrench size={24} color="var(--color-secondary)" /> : <Hammer size={24} color="#ff7675" />}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-1">
+                    <div className="flex flex-col gap-3" style={{ minWidth: 0, width: '100%' }}>
+                      <div className="flex items-center gap-3">
+                        <div className="booking-icon-box" style={{ 
+                          background: booking.type === 'Service' ? 'rgba(0, 206, 201, 0.1)' : 'rgba(255, 118, 117, 0.1)', 
+                          padding: '10px', 
+                          borderRadius: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}>
+                          {booking.type === 'Service' ? <Wrench size={18} color="var(--color-secondary)" /> : <Hammer size={18} color="#ff7675" />}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                           <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, whiteSpace: 'normal' }}>{booking.type} Booking</h3>
                           <span className="tag tag-outline" style={{ fontSize: '0.6rem', padding: '2px 6px', background: 'rgba(255,255,255,0.08)' }}>
                             ID: {booking.id.slice(-8).toUpperCase()}
                           </span>
                         </div>
+                      </div>
+
+                      <div style={{ paddingLeft: '2px' }}>
                         <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 500 }}>
                           Booked on: {formatDate(booking.bookingDate, booking.createdAt)}
                         </p>
                         
-                        <div className="flex flex-wrap gap-2 mt-3" style={{ width: '100%' }}>
+                        <div className="flex flex-wrap gap-2 mt-3">
                           <span className="tag" style={{ 
                             background: `${statusColor}15`, 
                             color: statusColor, 
@@ -162,12 +167,12 @@ const BookingsHistory = () => {
                       </div>
                     </div>
 
-                    <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 mt-2 md:mt-0" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '12px', marginTop: '4px' }} className="md:border-none md:pt-0 md:mt-0">
+                    <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 mt-1 md:mt-0 pt-3 md:pt-0" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                       <div className="flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}>
                         <MapPin size={16} />
-                        <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{booking.addressName}</span>
+                        <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{booking.addressName}</span>
                       </div>
-                      <div style={{ color: 'var(--color-primary-light)', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600, fontSize: '0.9rem' }}>
+                      <div style={{ color: 'var(--color-primary-light)', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600, fontSize: '0.85rem' }}>
                         {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                         {isExpanded ? 'Hide' : 'Details'}
                       </div>
