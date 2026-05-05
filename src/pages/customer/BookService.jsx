@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { collection, query, where, getDocs, addDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { MapPin, Info, ArrowRight, CheckCircle, AlertTriangle, ShieldCheck, Plus, Zap } from 'lucide-react';
+import AddressModal from '../../components/AddressModal';
 
 const BookService = () => {
   const { currentUser, userData } = useAuth();
@@ -14,6 +15,7 @@ const BookService = () => {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [pricing, setPricing] = useState({ eyeTechServicePrice: 300, nonEyeTechServicePrice: 500 });
+  const [showAddressModal, setShowAddressModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,7 +24,7 @@ const BookService = () => {
         const snapshot = await getDocs(q);
         const fetchedAddrs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setAddresses(fetchedAddrs);
-        if (fetchedAddrs.length > 0) setSelectedAddressId(fetchedAddrs[0].id);
+        if (fetchedAddrs.length > 0 && !selectedAddressId) setSelectedAddressId(fetchedAddrs[0].id);
 
         const amcQ = query(collection(db, 'purchased_amcs'), where('userId', '==', currentUser.uid));
         const amcSnap = await getDocs(amcQ);
@@ -39,7 +41,12 @@ const BookService = () => {
       }
     };
     if (currentUser) fetchData();
-  }, [currentUser]);
+  }, [currentUser, selectedAddressId]);
+
+  const handleAddressAdded = (newAddr) => {
+    setAddresses(prev => [...prev, newAddr]);
+    setSelectedAddressId(newAddr.id);
+  };
 
   const selectedAddress = addresses.find(a => a.id === selectedAddressId);
   
@@ -210,9 +217,14 @@ const BookService = () => {
             <div className="flex flex-col gap-3">
               <div className="flex justify-between items-center">
                 <label style={{ fontWeight: 600, fontSize: '0.95rem' }}>Service Address</label>
-                <a href="/customer/addresses" className="flex items-center gap-1" style={{ fontSize: '0.85rem', color: 'var(--color-primary-light)', fontWeight: 500 }}>
+                <button 
+                  type="button"
+                  onClick={() => setShowAddressModal(true)} 
+                  className="flex items-center gap-1" 
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--color-primary-light)', fontWeight: 500 }}
+                >
                   <Plus size={14} /> Add New Address
-                </a>
+                </button>
               </div>
               <select 
                 value={selectedAddressId} 
@@ -222,7 +234,7 @@ const BookService = () => {
                 style={{ width: '100%' }}
               >
                 {addresses.length === 0 ? (
-                  <option disabled>No addresses found</option>
+                  <option disabled value="">No addresses found</option>
                 ) : (
                   addresses.map(addr => (
                     <option key={addr.id} value={addr.id}>
@@ -286,6 +298,11 @@ const BookService = () => {
           </form>
         )}
       </div>
+      <AddressModal 
+        isOpen={showAddressModal} 
+        onClose={() => setShowAddressModal(false)} 
+        onAddressAdded={handleAddressAdded} 
+      />
     </div>
   );
 };
