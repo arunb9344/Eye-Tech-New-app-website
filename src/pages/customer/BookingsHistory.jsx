@@ -172,7 +172,6 @@ const BookingsHistory = () => {
                       </div>
                     </div>
                   </div>
-                </div>
 
                 {/* Expanded Section */}
                 {isExpanded && (
