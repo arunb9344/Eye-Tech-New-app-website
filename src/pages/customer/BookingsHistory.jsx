@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, updateDoc, doc, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { Clock, Wrench, Hammer, CheckCircle, FileText, Info, Phone, MapPin, User, ChevronDown, ChevronUp, XCircle } from 'lucide-react';
 import InvoiceGenerator from '../../utils/InvoiceGenerator';
