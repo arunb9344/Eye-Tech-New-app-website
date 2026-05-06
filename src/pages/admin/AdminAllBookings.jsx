@@ -492,7 +492,6 @@ const AdminAllBookings = () => {
                         </button>
                       </div>
                     </div>
-                  ) : (
                   ) : cancellingOn === booking.id ? (
                     <div className="flex-col gap-3" style={{ background: 'rgba(255, 77, 77, 0.03)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255, 77, 77, 0.2)' }}>
                       <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', fontWeight: 700, color: '#ff4d4d' }}>Cancel Booking</h4>
