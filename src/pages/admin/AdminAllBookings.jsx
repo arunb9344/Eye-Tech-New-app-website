@@ -29,6 +29,11 @@ const AdminAllBookings = () => {
   const [gstNumber, setGstNumber] = useState('');
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceDate, setInvoiceDate] = useState('');
+  
+  // Cancellation state
+  const [cancellingOn, setCancellingOn] = useState(null);
+  const [cancelReason, setCancelReason] = useState('Now working perfectly');
+  const [customCancelReason, setCustomCancelReason] = useState('');
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -136,10 +141,49 @@ const AdminAllBookings = () => {
       alert("Failed to complete booking.");
     }
   };
+  
+  const handleCancel = async (booking) => {
+    try {
+      const finalReason = cancelReason === 'Others' ? customCancelReason : cancelReason;
+      if (!finalReason.trim()) {
+        alert("Please provide a reason for cancellation");
+        return;
+      }
+
+      const updateData = {
+        status: 'Cancelled',
+        cancellationReason: finalReason,
+        cancelledBy: 'Admin',
+        cancelledAt: new Date().toISOString(),
+        cancelledDate: Date.now()
+      };
+
+      await updateDoc(doc(db, 'bookings', booking.id), updateData);
+
+      // Create notification signal for customer
+      await addDoc(collection(db, 'notification_signals'), {
+        title: 'Booking Cancelled',
+        body: `Your ${booking.type} request at ${booking.addressName} has been cancelled. Reason: ${finalReason}`,
+        recipientId: booking.userId,
+        status: 'pending',
+        type: 'booking_cancelled',
+        createdAt: Date.now()
+      });
+
+      setCancellingOn(null);
+      setCancelReason('Now working perfectly');
+      setCustomCancelReason('');
+      fetchBookings();
+    } catch (err) {
+      console.error("Error cancelling booking", err);
+      alert("Failed to cancel booking.");
+    }
+  };
 
   const filteredBookings = bookings.filter(b => {
     if (activeTab === 'Pending') return b.status === 'Pending' || b.status === 'Active' || b.status === 'In Progress';
     if (activeTab === 'Completed') return b.status === 'Completed';
+    if (activeTab === 'Cancelled') return b.status === 'Cancelled';
     return true; // All
   });
 
@@ -149,8 +193,8 @@ const AdminAllBookings = () => {
       <p className="mb-8">View and process customer service and installation requests.</p>
 
       {/* Tabs */}
-      <div className="flex gap-4 mb-8" style={{ borderBottom: 'var(--glass-border)', paddingBottom: '16px' }}>
-        {['Pending', 'Completed', 'All'].map(tab => (
+      <div className="flex gap-4 mb-8" style={{ borderBottom: 'var(--glass-border)', paddingBottom: '16px', overflowX: 'auto' }}>
+        {['Pending', 'Completed', 'Cancelled', 'All'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -278,6 +322,35 @@ const AdminAllBookings = () => {
                   {booking.adminNotes && (
                     <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#ff4d4d' }}>
                       Admin Private Notes: {booking.adminNotes}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {booking.status === 'Cancelled' && (
+                <div style={{ 
+                  marginTop: '12px', 
+                  background: 'rgba(255, 77, 77, 0.05)', 
+                  padding: '16px', 
+                  borderRadius: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                  border: '1px solid rgba(255, 77, 77, 0.1)'
+                }}>
+                  <h4 style={{ margin: 0, color: '#ff4d4d', fontSize: '0.95rem', fontWeight: 700 }}>Cancellation Details</h4>
+                  
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Cancelled on: {new Date(booking.cancelledDate || booking.cancelledAt).toLocaleString()}
+                  </p>
+                  
+                  <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 500 }}>
+                    Reason: {booking.cancellationReason || 'No reason provided'}
+                  </p>
+                  
+                  {booking.cancelledBy && (
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                      Cancelled by: {booking.cancelledBy}
                     </p>
                   )}
                 </div>
@@ -420,24 +493,78 @@ const AdminAllBookings = () => {
                       </div>
                     </div>
                   ) : (
-                    <button onClick={() => {
-                      setActingOn(booking.id);
-                      setGenerateGstInvoice(!!booking.gstNumber);
-                      setGstNumber(booking.gstNumber || '');
-                      setInvoiceNumber(booking.invoiceNumber || '');
-                      if (booking.invoiceDate) {
-                        const d = new Date(booking.invoiceDate);
-                        const yyyy = d.getFullYear();
-                        const mm = String(d.getMonth() + 1).padStart(2, '0');
-                        const dd = String(d.getDate()).padStart(2, '0');
-                        setInvoiceDate(`${yyyy}-${mm}-${dd}`);
-                      } else {
-                        setInvoiceDate('');
-                      }
-                    }} className="btn btn-primary flex justify-center items-center gap-2" style={{ width: '100%', borderRadius: '16px', padding: '16px' }}>
-                      <CheckCircle size={20} />
-                      <span style={{ fontSize: '1rem', fontWeight: 600 }}>Complete Work</span>
-                    </button>
+                  ) : cancellingOn === booking.id ? (
+                    <div className="flex-col gap-3" style={{ background: 'rgba(255, 77, 77, 0.03)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255, 77, 77, 0.2)' }}>
+                      <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', fontWeight: 700, color: '#ff4d4d' }}>Cancel Booking</h4>
+                      
+                      <div className="flex flex-col gap-3">
+                        <div>
+                          <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Reason for cancellation</label>
+                          <select 
+                            className="input-field"
+                            value={cancelReason}
+                            onChange={(e) => setCancelReason(e.target.value)}
+                            style={{ width: '100%', marginTop: '4px' }}
+                          >
+                            <option value="Now working perfectly">Now working perfectly</option>
+                            <option value="Others">Others</option>
+                          </select>
+                        </div>
+
+                        {cancelReason === 'Others' && (
+                          <div>
+                            <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Describe reason</label>
+                            <textarea 
+                              className="input-field"
+                              rows="2"
+                              value={customCancelReason}
+                              onChange={(e) => setCustomCancelReason(e.target.value)}
+                              style={{ width: '100%', marginTop: '4px' }}
+                              placeholder="Enter cancellation reason..."
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2 mt-4">
+                        <button onClick={() => setCancellingOn(null)} className="btn btn-outline" style={{ flex: 1 }}>Back</button>
+                        <button 
+                          onClick={() => handleCancel(booking)} 
+                          className="btn" 
+                          style={{ flex: 1, background: '#ff4d4d', color: 'white' }}
+                        >
+                          Confirm Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex gap-3">
+                      <button 
+                        onClick={() => setCancellingOn(booking.id)}
+                        className="btn btn-outline"
+                        style={{ flex: 1, borderColor: '#ff4d4d', color: '#ff4d4d', padding: '12px', borderRadius: '16px' }}
+                      >
+                        Cancel Booking
+                      </button>
+                      <button onClick={() => {
+                        setActingOn(booking.id);
+                        setGenerateGstInvoice(!!booking.gstNumber);
+                        setGstNumber(booking.gstNumber || '');
+                        setInvoiceNumber(booking.invoiceNumber || '');
+                        if (booking.invoiceDate) {
+                          const d = new Date(booking.invoiceDate);
+                          const yyyy = d.getFullYear();
+                          const mm = String(d.getMonth() + 1).padStart(2, '0');
+                          const dd = String(d.getDate()).padStart(2, '0');
+                          setInvoiceDate(`${yyyy}-${mm}-${dd}`);
+                        } else {
+                          setInvoiceDate('');
+                        }
+                      }} className="btn btn-primary flex justify-center items-center gap-2" style={{ flex: 2, borderRadius: '16px', padding: '12px' }}>
+                        <CheckCircle size={20} />
+                        <span style={{ fontSize: '1rem', fontWeight: 600 }}>Complete Work</span>
+                      </button>
+                    </div>
                   )}
                 </div>
               )}
