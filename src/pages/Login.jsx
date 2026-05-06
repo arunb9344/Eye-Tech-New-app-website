@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth, db } from '../firebase/config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -60,7 +60,7 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen" style={{ padding: '20px' }}>
+    <div className="flex flex-col items-center justify-center min-h-screen py-12 px-4">
       <div className="glass-panel animate-fade-in" style={{ width: '100%', maxWidth: '420px', padding: '2.5rem' }}>
         <div className="flex flex-col items-center mb-8 gap-4">
           <div className="flex items-center justify-center" style={{ width: '80px', height: '80px', borderRadius: '50%', overflow: 'hidden', border: '2px solid var(--color-primary-light)' }}>
@@ -129,10 +129,10 @@ const Login = () => {
 
       </div>
 
-      <div className="absolute bottom-8 flex justify-center gap-6 text-sm text-gray-500 w-full px-4">
-        <button onClick={() => navigate('/privacy')} className="hover:text-blue-400 transition-colors bg-transparent border-none cursor-pointer">Privacy Policy</button>
-        <button onClick={() => navigate('/terms')} className="hover:text-blue-400 transition-colors bg-transparent border-none cursor-pointer">Terms of Service</button>
-        <button onClick={() => navigate('/contact')} className="hover:text-blue-400 transition-colors bg-transparent border-none cursor-pointer">Contact Us</button>
+      <div className="mt-8 flex justify-center gap-6 text-sm text-gray-500">
+        <Link to="/privacy" className="hover:text-blue-400 transition-colors" style={{ textDecoration: 'none', color: 'inherit' }}>Privacy Policy</Link>
+        <Link to="/terms" className="hover:text-blue-400 transition-colors" style={{ textDecoration: 'none', color: 'inherit' }}>Terms of Service</Link>
+        <Link to="/contact" className="hover:text-blue-400 transition-colors" style={{ textDecoration: 'none', color: 'inherit' }}>Contact Us</Link>
       </div>
     </div>
   );
