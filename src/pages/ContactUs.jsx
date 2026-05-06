@@ -19,7 +19,7 @@ const ContactUs = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#1a1a2e] text-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-transparent text-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         <button 
           onClick={() => navigate(-1)}

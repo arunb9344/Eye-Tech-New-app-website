@@ -127,13 +127,12 @@ const Login = () => {
           </button>
         </div>
 
-        <div className="mt-8 flex justify-center gap-4 text-xs text-gray-500">
-          <button onClick={() => navigate('/privacy')} className="hover:text-blue-400 transition-colors">Privacy Policy</button>
-          <span>•</span>
-          <button onClick={() => navigate('/terms')} className="hover:text-blue-400 transition-colors">Terms of Service</button>
-          <span>•</span>
-          <button onClick={() => navigate('/contact')} className="hover:text-blue-400 transition-colors">Contact Us</button>
-        </div>
+      </div>
+
+      <div className="absolute bottom-8 flex justify-center gap-6 text-sm text-gray-500 w-full px-4">
+        <button onClick={() => navigate('/privacy')} className="hover:text-blue-400 transition-colors bg-transparent border-none cursor-pointer">Privacy Policy</button>
+        <button onClick={() => navigate('/terms')} className="hover:text-blue-400 transition-colors bg-transparent border-none cursor-pointer">Terms of Service</button>
+        <button onClick={() => navigate('/contact')} className="hover:text-blue-400 transition-colors bg-transparent border-none cursor-pointer">Contact Us</button>
       </div>
     </div>
   );
