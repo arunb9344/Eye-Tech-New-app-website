@@ -1,205 +1,229 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Shield, ShieldCheck, Wrench, Hammer, MapPin, Phone, Mail, ChevronRight, Star, Clock, Zap } from 'lucide-react';
+import { Shield, ShieldCheck, Wrench, Hammer, MapPin, Phone, Mail, ChevronRight, Star, CheckCircle, Users, Activity, Lock } from 'lucide-react';
 
 const LandingPage = () => {
   const navigate = useNavigate();
 
-  const services = [
-    {
-      title: 'Expert Installation',
-      description: 'Professional setup of CCTV, Biometrics, and advanced security systems for homes and businesses.',
-      icon: <Hammer className="text-blue-400" size={32} />,
-      color: 'blue'
-    },
-    {
-      title: 'Smart Maintenance',
-      description: 'Comprehensive AMC packages with trackable visits to keep your security running 24/7.',
-      icon: <Wrench className="text-secondary" size={32} />,
-      color: 'cyan'
-    },
-    {
-      title: 'System Health Check',
-      description: 'Regular diagnostics and troubleshooting to prevent security gaps before they happen.',
-      icon: <ShieldCheck className="text-green-400" size={32} />,
-      color: 'green'
-    }
-  ];
-
   return (
-    <div className="min-h-screen bg-transparent text-white">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 glass-panel !rounded-none border-t-0 border-x-0 bg-opacity-70 backdrop-blur-lg">
+    <div className="min-h-screen bg-white text-slate-900 font-sans">
+      {/* Top Bar */}
+      <div className="bg-[#0f172a] text-white py-2 px-4 hidden sm:block">
+        <div className="max-w-7xl mx-auto flex justify-between items-center text-xs font-medium tracking-wide">
+          <div className="flex gap-6">
+            <span className="flex items-center gap-2"><Phone size={14} className="text-blue-400" /> +91 98765 43210</span>
+            <span className="flex items-center gap-2"><Mail size={14} className="text-blue-400" /> contact@eyetechsecurities.in</span>
+          </div>
+          <div className="flex gap-4">
+            <span className="flex items-center gap-2"><MapPin size={14} className="text-blue-400" /> Bangalore, India</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Header */}
+      <nav className="sticky top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl border border-white/20 overflow-hidden">
-              <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
+            <img src="/logo.png" alt="Eye Tech Logo" className="h-12 w-12 object-contain" />
+            <div className="flex flex-col leading-tight">
+              <span className="text-xl font-black text-slate-900 tracking-tight">EYE TECH</span>
+              <span className="text-[10px] font-bold text-blue-600 uppercase tracking-[0.3em]">Securities</span>
             </div>
-            <span className="text-xl font-black tracking-tight">EYE TECH SECURITIES</span>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm font-bold uppercase tracking-widest text-gray-400">
-            <a href="#services" className="hover:text-white transition-colors">Services</a>
-            <a href="#about" className="hover:text-white transition-colors">About</a>
-            <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
+          
+          <div className="hidden md:flex items-center gap-10">
+            <a href="#services" className="text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors uppercase tracking-wider">Services</a>
+            <a href="#about" className="text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors uppercase tracking-wider">Why Us</a>
+            <Link to="/contact" className="text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors uppercase tracking-wider">Support</Link>
           </div>
-          <button 
-            onClick={() => navigate('/login')}
-            className="btn btn-primary !py-2 !px-6 text-sm"
-          >
-            Access Portal
-          </button>
+
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => navigate('/login')}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-lg shadow-blue-600/20 transition-all text-sm uppercase tracking-wider"
+            >
+              Client Login
+            </button>
+          </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-40 pb-20 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest mb-8 animate-fade-in">
-            <Shield size={14} /> Next-Gen Security Solutions
-          </div>
-          <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight animate-fade-in">
-            Securing Your Vision, <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Protecting Your World.</span>
-          </h1>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10 animate-fade-in">
-            Premium security system installation and automated maintenance services. From smart CCTV to biometric access, we provide the tech that keeps you safe.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in">
-            <button onClick={() => navigate('/login')} className="btn btn-primary py-4 px-10 text-lg w-full sm:w-auto">
-              Get Started <ChevronRight size={20} />
-            </button>
-            <Link to="/contact" className="btn btn-outline py-4 px-10 text-lg w-full sm:w-auto">
-              Request Callback
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Services Grid */}
-      <section id="services" className="py-24 bg-black/20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-black mb-4">Our Core Solutions</h2>
-            <p className="text-gray-400">Industry leading security services tailored for your specific needs.</p>
+      <section className="relative bg-slate-50 overflow-hidden border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 py-20 md:py-32 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="z-10 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100 border border-blue-200 text-blue-700 text-[10px] font-black uppercase tracking-[0.2em] mb-6">
+              <Shield size={14} /> Certified Security Solutions
+            </div>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 mb-8 leading-[1.1]">
+              Advanced <span className="text-blue-600">Protection</span> for Your Assets.
+            </h1>
+            <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              Eye Tech Securities provides end-to-end security system installations, professional maintenance, and AI-driven monitoring for high-value properties.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <button onClick={() => navigate('/login')} className="w-full sm:w-auto bg-slate-900 hover:bg-black text-white font-black py-4 px-10 rounded-xl flex items-center justify-center gap-2 transition-all shadow-xl">
+                Get Started Now <ChevronRight size={20} />
+              </button>
+              <Link to="/contact" className="w-full sm:w-auto text-slate-900 font-bold py-4 px-10 border-2 border-slate-200 rounded-xl hover:bg-slate-100 transition-all text-center">
+                Request a Quote
+              </Link>
+            </div>
+            
+            <div className="mt-12 pt-12 border-t border-slate-200 flex flex-wrap justify-center lg:justify-start gap-8 opacity-60 grayscale hover:grayscale-0 transition-all">
+              <div className="flex items-center gap-2 font-bold text-slate-500"><Lock size={18} /> Hikvision</div>
+              <div className="flex items-center gap-2 font-bold text-slate-500"><ShieldCheck size={18} /> Dahua</div>
+              <div className="flex items-center gap-2 font-bold text-slate-500"><Activity size={18} /> CP Plus</div>
+            </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {services.map((service, index) => (
-              <div key={index} className="glass-panel p-8 group hover:border-blue-500/50 transition-all">
-                <div className="mb-6 p-4 bg-white/5 rounded-2xl w-fit group-hover:scale-110 transition-transform">
-                  {service.icon}
-                </div>
-                <h3 className="text-2xl font-bold mb-4">{service.title}</h3>
-                <p className="text-gray-400 mb-6">{service.description}</p>
-                <div className="text-sm font-bold text-blue-400 flex items-center gap-2 cursor-pointer">
-                  Learn More <ChevronRight size={16} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="glass-panel p-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-black text-white mb-2">500+</div>
-              <div className="text-gray-500 text-xs font-bold uppercase tracking-widest">Installations</div>
-            </div>
-            <div>
-              <div className="text-4xl font-black text-white mb-2">99%</div>
-              <div className="text-gray-500 text-xs font-bold uppercase tracking-widest">Client Success</div>
-            </div>
-            <div>
-              <div className="text-4xl font-black text-white mb-2">24/7</div>
-              <div className="text-gray-500 text-xs font-bold uppercase tracking-widest">Support</div>
-            </div>
-            <div>
-              <div className="text-4xl font-black text-white mb-2">15+</div>
-              <div className="text-gray-500 text-xs font-bold uppercase tracking-widest">Cities Covered</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="py-24 px-4 overflow-hidden">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <div>
-            <h2 className="text-4xl font-black mb-8">Why Choose Eye Tech Securities?</h2>
-            <div className="space-y-6">
-              <div className="flex gap-4">
-                <div className="p-2 bg-blue-500/20 rounded-lg h-fit"><Clock className="text-blue-400" size={24} /></div>
-                <div>
-                  <h4 className="font-bold text-lg mb-1">Fast Response Time</h4>
-                  <p className="text-gray-400">Our technicians are available across the city to resolve issues within 24 hours.</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="p-2 bg-purple-500/20 rounded-lg h-fit"><Zap className="text-purple-400" size={24} /></div>
-                <div>
-                  <h4 className="font-bold text-lg mb-1">Advanced Technology</h4>
-                  <p className="text-gray-400">We only use the latest AI-powered cameras and cloud-connected security tech.</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="p-2 bg-green-500/20 rounded-lg h-fit"><Star className="text-green-400" size={24} /></div>
-                <div>
-                  <h4 className="font-bold text-lg mb-1">Certified Quality</h4>
-                  <p className="text-gray-400">All installations are performed by certified engineers with rigorous quality checks.</p>
-                </div>
-              </div>
-            </div>
-          </div>
           <div className="relative">
-             <div className="absolute -inset-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur-2xl opacity-20 animate-pulse"></div>
-             <div className="glass-panel p-4 relative aspect-video flex items-center justify-center">
-               <Shield size={120} className="text-white/10" />
-               <div className="absolute inset-0 flex items-center justify-center flex-col">
-                  <span className="text-3xl font-black italic">EYE TECH</span>
-                  <span className="text-sm tracking-[0.5em] text-gray-500 uppercase">Securities</span>
-               </div>
-             </div>
+            <div className="absolute -inset-10 bg-blue-500/10 blur-[100px] rounded-full"></div>
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl border-8 border-white">
+              <img 
+                src="/security_hero_banner_1778038799605.png" 
+                alt="Security Technology" 
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute bottom-6 right-6 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white/50 flex items-center gap-4">
+                <div className="bg-green-500 w-3 h-3 rounded-full animate-pulse"></div>
+                <div className="text-xs font-black text-slate-900 uppercase tracking-widest">Active Monitoring 24/7</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section id="services" className="py-24 px-4 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+            <div className="max-w-2xl">
+              <h2 className="text-sm font-black text-blue-600 uppercase tracking-[0.3em] mb-4">Our Expertise</h2>
+              <h3 className="text-4xl md:text-5xl font-black text-slate-900 leading-tight">Comprehensive Security Integration Services</h3>
+            </div>
+            <p className="text-slate-500 max-w-sm mb-1">We don't just install cameras; we build intelligent security ecosystems that protect what matters most.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="group p-10 bg-slate-50 rounded-3xl border border-slate-100 hover:border-blue-200 hover:bg-white hover:shadow-2xl transition-all duration-500">
+              <div className="mb-8 p-5 bg-blue-100 text-blue-600 rounded-2xl w-fit group-hover:bg-blue-600 group-hover:text-white transition-all">
+                <Hammer size={32} />
+              </div>
+              <h4 className="text-2xl font-black mb-4">CCTV & Surveillance</h4>
+              <p className="text-slate-600 mb-8 leading-relaxed">High-definition IP and analog surveillance systems with mobile integration and cloud storage solutions.</p>
+              <ul className="space-y-3 mb-10">
+                <li className="flex items-center gap-2 text-sm font-bold text-slate-500"><CheckCircle size={16} className="text-blue-500" /> AI Motion Detection</li>
+                <li className="flex items-center gap-2 text-sm font-bold text-slate-500"><CheckCircle size={16} className="text-blue-500" /> Night Vision Integration</li>
+                <li className="flex items-center gap-2 text-sm font-bold text-slate-500"><CheckCircle size={16} className="text-blue-500" /> 24/7 Mobile Access</li>
+              </ul>
+            </div>
+
+            <div className="group p-10 bg-slate-50 rounded-3xl border border-slate-100 hover:border-blue-200 hover:bg-white hover:shadow-2xl transition-all duration-500">
+              <div className="mb-8 p-5 bg-blue-100 text-blue-600 rounded-2xl w-fit group-hover:bg-blue-600 group-hover:text-white transition-all">
+                <Wrench size={32} />
+              </div>
+              <h4 className="text-2xl font-black mb-4">Annual Maintenance</h4>
+              <p className="text-slate-600 mb-8 leading-relaxed">Systematic AMC plans including regular health checks, breakdown visits, and replacement coverage.</p>
+              <ul className="space-y-3 mb-10">
+                <li className="flex items-center gap-2 text-sm font-bold text-slate-500"><CheckCircle size={16} className="text-blue-500" /> Preventive Maintenance</li>
+                <li className="flex items-center gap-2 text-sm font-bold text-slate-500"><CheckCircle size={16} className="text-blue-500" /> On-Site Technical Visits</li>
+                <li className="flex items-center gap-2 text-sm font-bold text-slate-500"><CheckCircle size={16} className="text-blue-500" /> Priority Support Line</li>
+              </ul>
+            </div>
+
+            <div className="group p-10 bg-slate-50 rounded-3xl border border-slate-100 hover:border-blue-200 hover:bg-white hover:shadow-2xl transition-all duration-500">
+              <div className="mb-8 p-5 bg-blue-100 text-blue-600 rounded-2xl w-fit group-hover:bg-blue-600 group-hover:text-white transition-all">
+                <Users size={32} />
+              </div>
+              <h4 className="text-2xl font-black mb-4">Access Control</h4>
+              <p className="text-slate-600 mb-8 leading-relaxed">Manage entry points with biometric, RFID, and face-recognition technology for offices and campuses.</p>
+              <ul className="space-y-3 mb-10">
+                <li className="flex items-center gap-2 text-sm font-bold text-slate-500"><CheckCircle size={16} className="text-blue-500" /> Biometric Authentication</li>
+                <li className="flex items-center gap-2 text-sm font-bold text-slate-500"><CheckCircle size={16} className="text-blue-500" /> Time & Attendance</li>
+                <li className="flex items-center gap-2 text-sm font-bold text-slate-500"><CheckCircle size={16} className="text-blue-500" /> Smart Door Integration</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 px-4">
+        <div className="max-w-7xl mx-auto bg-blue-600 rounded-[3rem] p-12 md:p-20 relative overflow-hidden shadow-2xl shadow-blue-600/40">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-48 -mt-48 blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-black/10 rounded-full -ml-48 -mb-48 blur-3xl"></div>
+          
+          <div className="relative z-10 text-center max-w-3xl mx-auto">
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-8">Ready to upgrade your security infrastructure?</h2>
+            <p className="text-blue-100 text-lg mb-12 opacity-90">Join 500+ satisfied clients who trust Eye Tech Securities for their daily protection and peace of mind.</p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+              <button onClick={() => navigate('/login')} className="w-full sm:w-auto bg-white text-blue-600 font-black py-4 px-12 rounded-2xl hover:scale-105 transition-transform shadow-xl">
+                Enter Client Portal
+              </button>
+              <Link to="/contact" className="w-full sm:w-auto text-white font-black py-4 px-12 border-2 border-white/30 rounded-2xl hover:bg-white/10 transition-all">
+                Contact Sales
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-            <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-lg border border-white/20 overflow-hidden">
-                  <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
-                </div>
-                <span className="text-lg font-black">EYE TECH SECURITIES</span>
+      <footer className="bg-slate-900 text-white pt-24 pb-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
+            <div className="col-span-1 lg:col-span-1">
+              <div className="flex items-center gap-3 mb-8">
+                <img src="/logo.png" alt="Logo" className="h-10 w-10 brightness-200" />
+                <span className="text-xl font-black tracking-tight">EYE TECH</span>
               </div>
-              <p className="text-gray-500 max-w-sm">
-                A leading provider of integrated security systems and maintenance solutions, dedicated to keeping your environment safe and smart.
+              <p className="text-slate-400 text-sm leading-relaxed mb-8">
+                Leading the way in intelligent security solutions. We combine advanced hardware with professional maintenance for ultimate protection.
               </p>
+              <div className="flex gap-4">
+                <div className="p-2 bg-slate-800 rounded-lg hover:bg-blue-600 transition-colors cursor-pointer"><Phone size={18} /></div>
+                <div className="p-2 bg-slate-800 rounded-lg hover:bg-blue-600 transition-colors cursor-pointer"><Mail size={18} /></div>
+                <div className="p-2 bg-slate-800 rounded-lg hover:bg-blue-600 transition-colors cursor-pointer"><MapPin size={18} /></div>
+              </div>
             </div>
+
             <div>
-              <h4 className="font-bold mb-6 uppercase tracking-widest text-xs text-gray-400">Quick Links</h4>
-              <ul className="space-y-4 text-gray-500">
-                <li><a href="#services" className="hover:text-blue-400">Services</a></li>
-                <li><a href="#about" className="hover:text-blue-400">About Us</a></li>
-                <li><Link to="/contact" className="hover:text-blue-400">Contact Us</Link></li>
-                <li><Link to="/login" className="hover:text-blue-400">Client Portal</Link></li>
+              <h5 className="text-sm font-black uppercase tracking-[0.2em] text-slate-500 mb-8">Services</h5>
+              <ul className="space-y-4 text-slate-400 text-sm font-medium">
+                <li className="hover:text-blue-400 cursor-pointer transition-colors">CCTV Installation</li>
+                <li className="hover:text-blue-400 cursor-pointer transition-colors">Biometric Access</li>
+                <li className="hover:text-blue-400 cursor-pointer transition-colors">AMC Maintenance</li>
+                <li className="hover:text-blue-400 cursor-pointer transition-colors">Security Audit</li>
               </ul>
             </div>
+
             <div>
-              <h4 className="font-bold mb-6 uppercase tracking-widest text-xs text-gray-400">Legal</h4>
-              <ul className="space-y-4 text-gray-500">
-                <li><Link to="/privacy" className="hover:text-blue-400">Privacy Policy</Link></li>
-                <li><Link to="/terms" className="hover:text-blue-400">Terms of Service</Link></li>
+              <h5 className="text-sm font-black uppercase tracking-[0.2em] text-slate-500 mb-8">Company</h5>
+              <ul className="space-y-4 text-slate-400 text-sm font-medium">
+                <li className="hover:text-blue-400 cursor-pointer transition-colors">About Eye Tech</li>
+                <li className="hover:text-blue-400 cursor-pointer transition-colors">Our Projects</li>
+                <li className="hover:text-blue-400 cursor-pointer transition-colors">Support Center</li>
+                <li><Link to="/contact" className="hover:text-blue-400 no-underline transition-colors">Contact Us</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h5 className="text-sm font-black uppercase tracking-[0.2em] text-slate-500 mb-8">Legal & Privacy</h5>
+              <ul className="space-y-4 text-slate-400 text-sm font-medium">
+                <li><Link to="/privacy" className="hover:text-blue-400 no-underline transition-colors">Privacy Policy</Link></li>
+                <li><Link to="/terms" className="hover:text-blue-400 no-underline transition-colors">Terms of Service</Link></li>
+                <li><Link to="/login" className="hover:text-blue-400 no-underline transition-colors">Admin Login</Link></li>
               </ul>
             </div>
           </div>
-          <div className="pt-8 border-t border-white/5 text-center text-gray-600 text-sm">
-            &copy; {new Date().getFullYear()} Eye Tech Securities. All rights reserved.
+          
+          <div className="pt-12 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 text-slate-500 text-xs font-bold uppercase tracking-widest">
+            <p>&copy; {new Date().getFullYear()} Eye Tech Securities. All rights reserved.</p>
+            <div className="flex gap-8">
+              <span>ISO 9001:2015 Certified</span>
+              <span>Made with Excellence</span>
+            </div>
           </div>
         </div>
       </footer>
