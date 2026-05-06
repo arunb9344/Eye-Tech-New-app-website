@@ -159,6 +159,17 @@ const BookService = () => {
       };
       
       await addDoc(collection(db, 'bookings'), bookingData);
+      
+      // Create notification signal for admin
+      await addDoc(collection(db, 'notification_signals'), {
+        title: 'New Service Booking',
+        body: `${bookingData.userName} requested service at ${bookingData.addressName}`,
+        recipientRole: 'Admin',
+        status: 'pending',
+        type: 'new_booking',
+        createdAt: Date.now()
+      });
+
       setSuccess(true);
     } catch (err) {
       console.error("Error creating booking:", err);

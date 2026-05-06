@@ -5,7 +5,7 @@ import { db } from '../firebase/config';
 import { X } from 'lucide-react';
 
 const AddressFormModal = ({ isOpen, onClose, onAddressSaved, editingAddress = null }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, userData } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   
   // Form State
@@ -48,6 +48,17 @@ const AddressFormModal = ({ isOpen, onClose, onAddressSaved, editingAddress = nu
         addressData.freeServiceVisitsRemaining = 0;
         addressData.maxFreeServiceVisits = 0;
         const docRef = await addDoc(collection(db, 'addresses'), addressData);
+        
+        // Create notification signal for admin
+        await addDoc(collection(db, 'notification_signals'), {
+          title: 'New Address Added',
+          body: `${userData?.name || currentUser.displayName || 'Customer'} added a new address: ${label}`,
+          recipientRole: 'Admin',
+          status: 'pending',
+          type: 'new_address',
+          createdAt: Date.now()
+        });
+
         onAddressSaved(docRef.id);
       }
       onClose();

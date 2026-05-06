@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, updateDoc, doc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, doc, query, orderBy, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { Clock, Wrench, Hammer, Search, CheckCircle } from 'lucide-react';
 
@@ -100,6 +100,16 @@ const AdminAllBookings = () => {
 
       // Complete booking
       await updateDoc(doc(db, 'bookings', booking.id), updateData);
+
+      // Create notification signal for customer
+      await addDoc(collection(db, 'notification_signals'), {
+        title: 'Booking Completed',
+        body: `Your ${booking.type} request at ${booking.addressName} has been completed.`,
+        recipientId: booking.userId,
+        status: 'pending',
+        type: 'booking_completed',
+        createdAt: Date.now()
+      });
 
       // If Installation booking, automatically mark address as Eye Tech Installed
       if (!booking.addressDetails?.isEyeTechInstalled && booking.type === 'Installation') {
