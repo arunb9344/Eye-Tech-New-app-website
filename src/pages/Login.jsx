@@ -126,6 +126,14 @@ const Login = () => {
             Phone Number
           </button>
         </div>
+
+        <div className="mt-8 flex justify-center gap-4 text-xs text-gray-500">
+          <button onClick={() => navigate('/privacy')} className="hover:text-blue-400 transition-colors">Privacy Policy</button>
+          <span>•</span>
+          <button onClick={() => navigate('/terms')} className="hover:text-blue-400 transition-colors">Terms of Service</button>
+          <span>•</span>
+          <button onClick={() => navigate('/contact')} className="hover:text-blue-400 transition-colors">Contact Us</button>
+        </div>
       </div>
     </div>
   );
