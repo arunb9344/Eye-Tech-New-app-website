@@ -24,6 +24,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminManageAddresses from './pages/admin/AdminManageAddresses';
 import AdminAllBookings from './pages/admin/AdminAllBookings';
 import AdminManageAMC from './pages/admin/AdminManageAMC';
+import AdminCustomers from './pages/admin/AdminCustomers';
 import AdminSettings from './pages/admin/AdminSettings';
 
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -73,6 +74,7 @@ function App() {
             <Route path="addresses" element={<AdminManageAddresses />} />
             <Route path="bookings" element={<AdminAllBookings />} />
             <Route path="amc" element={<AdminManageAMC />} />
+            <Route path="customers" element={<AdminCustomers />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
         </Routes>
