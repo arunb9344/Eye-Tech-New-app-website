@@ -10,6 +10,7 @@ const BookService = () => {
   const [addresses, setAddresses] = useState([]);
   const [purchasedAmcs, setPurchasedAmcs] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState('');
+  const [issue, setIssue] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -116,7 +117,7 @@ const BookService = () => {
     }
 
     return {
-      message: `Chargeable (Standard pricing applies: ₹${price}).`,
+      message: `Chargeable (Minimum Visiting Charges: ₹${price}).`,
       icon: <AlertTriangle size={20} />,
       gradient: 'linear-gradient(135deg, rgba(231, 76, 60, 0.15) 0%, rgba(192, 57, 43, 0.05) 100%)',
       border: 'rgba(231, 76, 60, 0.2)',
@@ -126,9 +127,22 @@ const BookService = () => {
 
   const info = getInfoDisplay();
 
+  const getPossibleSolution = () => {
+    if (!isFreeServiceValid || !issue) return null;
+    switch (issue) {
+      case 'Beep Sound': return 'Restart Once & Check';
+      case 'No PlayBack': return 'Check Live View Date & Time. If wrong kindly try changing.\nTry changing any other Adaptor for DVR & check';
+      case 'No Video': return 'Check whether all switches are ON and power cables are connected to Socket';
+      case 'No Mobile View(Offline)': return 'Check whether Internet is working Correctly\nCheck whether all switches are ON and power cables are connected to Socket';
+      default: return null;
+    }
+  };
+
+  const possibleSolution = getPossibleSolution();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedAddressId || !description || !selectedAddress) return;
+    if (!selectedAddressId || !issue || !selectedAddress) return;
     
     setSubmitting(true);
     try {
@@ -141,7 +155,8 @@ const BookService = () => {
         addressName: selectedAddress.label || selectedAddress.name || 'Address',
         fullAddress: `${selectedAddress.addressLine1 || selectedAddress.street || ''}, ${selectedAddress.addressLine2 || ''}, ${selectedAddress.city || ''}, ${selectedAddress.state || ''} - ${selectedAddress.pincode || ''}`.replace(/, ,/g, ','),
         pincode: selectedAddress.pincode || '',
-        description: description || '',
+        issue: issue,
+        description: description ? `Issue: ${issue}\nNotes: ${description}` : `Issue: ${issue}`,
         status: 'Pending',
         chargeType: chargeType || 'Chargeable',
         isEyeTechInstalled: !!selectedAddress.isEyeTechInstalled,
@@ -286,13 +301,49 @@ const BookService = () => {
             </div>
 
             <div className="flex flex-col gap-3">
-              <label style={{ fontWeight: 600, fontSize: '0.95rem' }}>Service Description / Issue</label>
+              <label style={{ fontWeight: 600, fontSize: '0.95rem' }}>Select Issue</label>
+              <select 
+                value={issue}
+                onChange={(e) => setIssue(e.target.value)}
+                required
+                className="premium-select"
+                style={{ width: '100%', padding: '16px', fontSize: '1rem' }}
+              >
+                <option value="" disabled>-- Select your issue --</option>
+                <option value="Beep Sound">Beep Sound</option>
+                <option value="No PlayBack">No PlayBack</option>
+                <option value="No Video">No Video</option>
+                <option value="Flickering">Flickering</option>
+                <option value="No Mobile View(Offline)">No Mobile View(Offline)</option>
+                <option value="Others">Others</option>
+              </select>
+            </div>
+
+            {possibleSolution && (
+              <div style={{
+                background: 'rgba(255, 152, 0, 0.1)',
+                border: '1px solid rgba(255, 152, 0, 0.3)',
+                padding: '16px',
+                borderRadius: '12px',
+                color: '#ff9800'
+              }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <Info size={18} />
+                  <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Possible Solution (Try this first)</span>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.9rem', whiteSpace: 'pre-line', lineHeight: 1.5 }}>
+                  {possibleSolution}
+                </p>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3">
+              <label style={{ fontWeight: 600, fontSize: '0.95rem' }}>Additional Notes (Optional)</label>
               <textarea 
-                rows="5" 
-                placeholder="Please describe the problem you're experiencing with your system..."
+                rows="3" 
+                placeholder="Any other details..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                required
                 style={{ padding: '16px', fontSize: '1rem' }}
               ></textarea>
             </div>
@@ -300,13 +351,13 @@ const BookService = () => {
             <button 
               type="submit" 
               className="btn btn-primary" 
-              disabled={submitting || !selectedAddressId || !description}
+              disabled={submitting || !selectedAddressId || !issue}
               style={{ 
                 padding: '16px', 
                 fontSize: '1.1rem', 
                 fontWeight: 700,
                 marginTop: '8px',
-                background: description ? 'var(--gradient-primary)' : 'rgba(255,255,255,0.1)'
+                background: issue ? 'var(--gradient-primary)' : 'rgba(255,255,255,0.1)'
               }}
             >
               {submitting ? 'Processing...' : 'Submit Service Request'}
