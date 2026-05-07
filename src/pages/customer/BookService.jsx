@@ -10,6 +10,7 @@ const BookService = () => {
   const [addresses, setAddresses] = useState([]);
   const [purchasedAmcs, setPurchasedAmcs] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState('');
+  const [product, setProduct] = useState('');
   const [issue, setIssue] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(true);
@@ -128,7 +129,7 @@ const BookService = () => {
   const info = getInfoDisplay();
 
   const getPossibleSolution = () => {
-    if (!isFreeServiceValid || !issue) return null;
+    if (!isFreeServiceValid || !issue || product !== 'CCTV Camera') return null;
     switch (issue) {
       case 'Beep Sound': return 'Restart Once & Check';
       case 'No PlayBack': return 'Check Live View Date & Time. If wrong kindly try changing.\nTry changing any other Adaptor for DVR & check';
@@ -140,9 +141,14 @@ const BookService = () => {
 
   const possibleSolution = getPossibleSolution();
 
+  // Dynamic issue options
+  const issueOptions = product === 'CCTV Camera' 
+    ? ['Beep Sound', 'No PlayBack', 'No Video', 'Flickering', 'No Mobile View(Offline)', 'Others']
+    : ['Others'];
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedAddressId || !issue || !selectedAddress) return;
+    if (!selectedAddressId || !product || !issue || !selectedAddress) return;
     
     setSubmitting(true);
     try {
@@ -155,8 +161,9 @@ const BookService = () => {
         addressName: selectedAddress.label || selectedAddress.name || 'Address',
         fullAddress: `${selectedAddress.addressLine1 || selectedAddress.street || ''}, ${selectedAddress.addressLine2 || ''}, ${selectedAddress.city || ''}, ${selectedAddress.state || ''} - ${selectedAddress.pincode || ''}`.replace(/, ,/g, ','),
         pincode: selectedAddress.pincode || '',
+        product: product,
         issue: issue,
-        description: description ? `Issue: ${issue}\nNotes: ${description}` : `Issue: ${issue}`,
+        description: description ? `Product: ${product}\nIssue: ${issue}\nNotes: ${description}` : `Product: ${product}\nIssue: ${issue}`,
         status: 'Pending',
         chargeType: chargeType || 'Chargeable',
         isEyeTechInstalled: !!selectedAddress.isEyeTechInstalled,
@@ -301,23 +308,42 @@ const BookService = () => {
             </div>
 
             <div className="flex flex-col gap-3">
-              <label style={{ fontWeight: 600, fontSize: '0.95rem' }}>Select Issue</label>
+              <label style={{ fontWeight: 600, fontSize: '0.95rem' }}>Select Product</label>
               <select 
-                value={issue}
-                onChange={(e) => setIssue(e.target.value)}
+                value={product}
+                onChange={(e) => {
+                  setProduct(e.target.value);
+                  setIssue(''); // reset issue when product changes
+                }}
                 required
                 className="premium-select"
                 style={{ width: '100%', padding: '16px', fontSize: '1rem' }}
               >
-                <option value="" disabled>-- Select your issue --</option>
-                <option value="Beep Sound">Beep Sound</option>
-                <option value="No PlayBack">No PlayBack</option>
-                <option value="No Video">No Video</option>
-                <option value="Flickering">Flickering</option>
-                <option value="No Mobile View(Offline)">No Mobile View(Offline)</option>
-                <option value="Others">Others</option>
+                <option value="" disabled>-- Select Product --</option>
+                <option value="CCTV Camera">CCTV Camera</option>
+                <option value="Video Door Phone">Video Door Phone</option>
+                <option value="Intrusion Alarm">Intrusion Alarm</option>
+                <option value="Biometric & Access Control">Biometric & Access Control</option>
               </select>
             </div>
+
+            {product && (
+              <div className="flex flex-col gap-3">
+                <label style={{ fontWeight: 600, fontSize: '0.95rem' }}>Select Issue</label>
+                <select 
+                  value={issue}
+                  onChange={(e) => setIssue(e.target.value)}
+                  required
+                  className="premium-select"
+                  style={{ width: '100%', padding: '16px', fontSize: '1rem' }}
+                >
+                  <option value="" disabled>-- Select your issue --</option>
+                  {issueOptions.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {possibleSolution && (
               <div style={{
@@ -351,13 +377,13 @@ const BookService = () => {
             <button 
               type="submit" 
               className="btn btn-primary" 
-              disabled={submitting || !selectedAddressId || !issue}
+              disabled={submitting || !selectedAddressId || !product || !issue}
               style={{ 
                 padding: '16px', 
                 fontSize: '1.1rem', 
                 fontWeight: 700,
                 marginTop: '8px',
-                background: issue ? 'var(--gradient-primary)' : 'rgba(255,255,255,0.1)'
+                background: (product && issue) ? 'var(--gradient-primary)' : 'rgba(255,255,255,0.1)'
               }}
             >
               {submitting ? 'Processing...' : 'Submit Service Request'}
