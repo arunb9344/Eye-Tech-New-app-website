@@ -35,6 +35,10 @@ const AdminAllBookings = () => {
   const [cancelReason, setCancelReason] = useState('Now working perfectly');
   const [customCancelReason, setCustomCancelReason] = useState('');
 
+  // Scheduling state
+  const [schedulingOn, setSchedulingOn] = useState(null);
+  const [scheduledDateStr, setScheduledDateStr] = useState('');
+
   const fetchBookings = async () => {
     setLoading(true);
     try {
@@ -180,6 +184,50 @@ const AdminAllBookings = () => {
     }
   };
 
+  const handleSchedule = async (booking) => {
+    try {
+      if (!scheduledDateStr) {
+        alert("Please select a date");
+        return;
+      }
+      const [year, month, day] = scheduledDateStr.split('-');
+      const dateObj = new Date(year, month - 1, day);
+      const scheduledTimestamp = dateObj.getTime();
+
+      const updateData = {
+        scheduledDate: scheduledTimestamp
+      };
+
+      await updateDoc(doc(db, 'bookings', booking.id), updateData);
+
+      // Create notification signal for customer
+      const today = new Date();
+      const isToday = today.getFullYear() === dateObj.getFullYear() && 
+                      today.getMonth() === dateObj.getMonth() && 
+                      today.getDate() === dateObj.getDate();
+
+      const dateString = dateObj.toLocaleDateString('en-GB');
+
+      await addDoc(collection(db, 'notification_signals'), {
+        title: 'Booking Scheduled',
+        body: isToday 
+          ? `Your ${booking.type} request has been scheduled for today.`
+          : `Your ${booking.type} request has been scheduled for ${dateString}.`,
+        recipientId: booking.userId,
+        status: 'pending',
+        type: 'booking_scheduled_immediate',
+        createdAt: Date.now()
+      });
+
+      setSchedulingOn(null);
+      setScheduledDateStr('');
+      fetchBookings();
+    } catch (err) {
+      console.error("Error scheduling booking", err);
+      alert("Failed to schedule booking.");
+    }
+  };
+
   const filteredBookings = bookings.filter(b => {
     if (activeTab === 'Pending') return b.status === 'Pending' || b.status === 'Active' || b.status === 'In Progress';
     if (activeTab === 'Completed') return b.status === 'Completed';
@@ -275,6 +323,11 @@ const AdminAllBookings = () => {
               <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                 Booked on: {new Date(booking.bookingDate || booking.createdAt).toLocaleString()}
               </p>
+              {booking.scheduledDate && (
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'var(--color-primary-light)', fontWeight: 700 }}>
+                  Scheduled Date: {new Date(booking.scheduledDate).toLocaleDateString('en-GB')}
+                </p>
+              )}
 
               {booking.status === 'Completed' && (
                 <div style={{ 
@@ -536,15 +589,63 @@ const AdminAllBookings = () => {
                         </button>
                       </div>
                     </div>
+                  ) : schedulingOn === booking.id ? (
+                    <div className="flex-col gap-3" style={{ background: 'rgba(52, 152, 219, 0.03)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(52, 152, 219, 0.2)' }}>
+                      <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', fontWeight: 700, color: '#3498db' }}>Schedule Booking</h4>
+                      
+                      <div className="flex flex-col gap-3">
+                        <div>
+                          <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Select Date</label>
+                          <input 
+                            type="date"
+                            className="input-field"
+                            value={scheduledDateStr}
+                            onChange={(e) => setScheduledDateStr(e.target.value)}
+                            style={{ width: '100%', marginTop: '4px' }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 mt-4">
+                        <button onClick={() => setSchedulingOn(null)} className="btn btn-outline" style={{ flex: 1 }}>Back</button>
+                        <button 
+                          onClick={() => handleSchedule(booking)} 
+                          className="btn" 
+                          style={{ flex: 1, background: '#3498db', color: 'white' }}
+                        >
+                          Confirm Schedule
+                        </button>
+                      </div>
+                    </div>
                   ) : (
-                    <div className="flex gap-3">
-                      <button 
-                        onClick={() => setCancellingOn(booking.id)}
-                        className="btn btn-outline"
-                        style={{ flex: 1, borderColor: '#ff4d4d', color: '#ff4d4d', padding: '12px', borderRadius: '16px' }}
-                      >
-                        Cancel Booking
-                      </button>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex gap-3">
+                        <button 
+                          onClick={() => setCancellingOn(booking.id)}
+                          className="btn btn-outline"
+                          style={{ flex: 1, borderColor: '#ff4d4d', color: '#ff4d4d', padding: '12px', borderRadius: '16px' }}
+                        >
+                          Cancel
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setSchedulingOn(booking.id);
+                            if (booking.scheduledDate) {
+                              const d = new Date(booking.scheduledDate);
+                              const yyyy = d.getFullYear();
+                              const mm = String(d.getMonth() + 1).padStart(2, '0');
+                              const dd = String(d.getDate()).padStart(2, '0');
+                              setScheduledDateStr(`${yyyy}-${mm}-${dd}`);
+                            } else {
+                              setScheduledDateStr('');
+                            }
+                          }}
+                          className="btn btn-outline"
+                          style={{ flex: 1, borderColor: '#3498db', color: '#3498db', padding: '12px', borderRadius: '16px' }}
+                        >
+                          {booking.scheduledDate ? "Reschedule" : "Schedule"}
+                        </button>
+                      </div>
                       <button onClick={() => {
                         setActingOn(booking.id);
                         setGenerateGstInvoice(!!booking.gstNumber);

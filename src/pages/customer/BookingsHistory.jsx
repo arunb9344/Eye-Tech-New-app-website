@@ -202,6 +202,12 @@ const BookingsHistory = () => {
               <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                 Booked on: {new Date(booking.bookingDate || booking.createdAt).toLocaleString()}
               </p>
+              
+              {booking.scheduledDate && (
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'var(--color-primary-light)', fontWeight: 700 }}>
+                  Scheduled Date: {new Date(booking.scheduledDate).toLocaleDateString('en-GB')}
+                </p>
+              )}
 
               {booking.status === 'Completed' && (
                 <div style={{ 
