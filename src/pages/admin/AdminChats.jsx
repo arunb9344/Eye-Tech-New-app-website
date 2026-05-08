@@ -137,29 +137,39 @@ const AdminChats = () => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+            <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-gray-50/50">
               {messages.map((msg, idx) => {
                 const isMe = msg.senderRole === 'Admin';
                 return (
-                  <div key={idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[70%] rounded-2xl p-4 shadow-sm ${
+                  <div key={idx} className={`flex items-end gap-3 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                    {!isMe && (
+                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-600 shadow-sm border-2 border-white">
+                        {msg.customerName.charAt(0)}
+                      </div>
+                    )}
+                    <div className={`max-w-[70%] p-4 shadow-sm transition-all hover:shadow-md ${
                       isMe 
-                        ? 'bg-blue-600 text-white rounded-tr-none' 
-                        : 'bg-white text-gray-800 border rounded-tl-none'
+                        ? 'bg-blue-600 text-white rounded-[24px] rounded-br-[4px]' 
+                        : 'bg-white text-gray-800 border rounded-[24px] rounded-bl-[4px] border-gray-200'
                     }`}>
                       {msg.attachmentUrl && (
-                        <img 
-                          src={msg.attachmentUrl} 
-                          alt="attachment" 
-                          className="rounded-lg mb-2 max-w-full h-auto cursor-pointer border border-white/20"
-                          onClick={() => window.open(msg.attachmentUrl, '_blank')}
-                        />
+                        <div className="mb-3 overflow-hidden rounded-xl border border-white/20">
+                          <img 
+                            src={msg.attachmentUrl} 
+                            alt="attachment" 
+                            className="max-w-full h-auto cursor-pointer hover:scale-105 transition-transform"
+                            onClick={() => window.open(msg.attachmentUrl, '_blank')}
+                          />
+                        </div>
                       )}
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
-                      <p className={`text-[10px] mt-2 text-right ${isMe ? 'text-blue-100' : 'text-gray-400'}`}>
+                      <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                      <div className={`text-[10px] mt-2 flex justify-end items-center gap-1 ${isMe ? 'text-blue-100' : 'text-gray-400'}`}>
                         {formatTime(msg.timestamp)}
-                      </p>
+                      </div>
                     </div>
+                    {isMe && (
+                      <div className="w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow-sm"></div>
+                    )}
                   </div>
                 );
               })}
@@ -167,20 +177,20 @@ const AdminChats = () => {
             </div>
 
             {/* Input */}
-            <div className="p-4 bg-white border-t">
+            <div className="p-6 bg-white border-t border-gray-100">
               {filePreview && (
-                <div className="relative inline-block mb-3">
-                  <img src={filePreview} alt="preview" className="h-24 w-24 object-cover rounded-lg border shadow-sm" />
+                <div className="relative inline-block mb-4">
+                  <img src={filePreview} alt="preview" className="h-24 w-24 object-cover rounded-2xl border-2 border-blue-50 shadow-lg" />
                   <button 
                     onClick={() => { setSelectedFile(null); setFilePreview(null); }}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors"
+                    className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-1.5 shadow-xl hover:bg-red-600 transition-all hover:scale-110"
                   >
-                    <FaTimes size={10} />
+                    <FaTimes size={12} />
                   </button>
                 </div>
               )}
               
-              <form onSubmit={handleSend} className="flex items-center gap-3">
+              <form onSubmit={handleSend} className="flex items-center gap-3 bg-gray-50 p-2 rounded-[32px] border border-gray-200 shadow-inner">
                 <input 
                   type="file" 
                   accept="image/*" 
@@ -191,7 +201,7 @@ const AdminChats = () => {
                 <button 
                   type="button"
                   onClick={() => fileInputRef.current.click()}
-                  className="p-3 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-all"
+                  className="p-3 text-gray-400 hover:text-blue-600 hover:bg-white rounded-full transition-all shadow-sm"
                   title="Attach image"
                 >
                   <FaPaperclip size={20} />
@@ -200,9 +210,9 @@ const AdminChats = () => {
                 <textarea 
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
-                  placeholder="Type your reply here..."
+                  placeholder="Write a reply..."
                   rows="1"
-                  className="flex-1 border-2 border-gray-100 rounded-2xl px-4 py-3 focus:outline-none focus:border-blue-400 text-sm resize-none"
+                  className="flex-1 bg-transparent border-none px-2 py-3 focus:outline-none focus:ring-0 text-[15px] text-gray-700 resize-none"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -214,8 +224,10 @@ const AdminChats = () => {
                 <button 
                   type="submit"
                   disabled={loading || (!inputText.trim() && !selectedFile)}
-                  className={`p-4 bg-blue-600 text-white rounded-2xl transition-all ${
-                    loading || (!inputText.trim() && !selectedFile) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700 shadow-md active:scale-95'
+                  className={`p-4 bg-blue-600 text-white rounded-full transition-all flex items-center justify-center shadow-lg ${
+                    loading || (!inputText.trim() && !selectedFile) 
+                      ? 'opacity-40 cursor-not-allowed grayscale' 
+                      : 'hover:bg-blue-700 hover:shadow-blue-200 active:scale-95'
                   }`}
                 >
                   {loading ? (

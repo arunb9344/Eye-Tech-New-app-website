@@ -72,29 +72,39 @@ const CustomerChat = () => {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
         {messages.map((msg, idx) => {
           const isMe = msg.senderRole === 'Customer';
           return (
-            <div key={idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[70%] rounded-2xl p-3 ${
+            <div key={idx} className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+              {!isMe && (
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500 shadow-sm border border-white">
+                  {msg.senderRole.charAt(0)}
+                </div>
+              )}
+              <div className={`max-w-[75%] p-4 shadow-sm transition-all hover:shadow-md ${
                 isMe 
-                  ? 'bg-blue-600 text-white rounded-tr-none' 
-                  : 'bg-white text-gray-800 border rounded-tl-none shadow-sm'
+                  ? 'bg-blue-600 text-white rounded-[24px] rounded-br-[4px]' 
+                  : 'bg-gray-100 text-gray-800 rounded-[24px] rounded-bl-[4px] border border-gray-200'
               }`}>
                 {msg.attachmentUrl && (
-                  <img 
-                    src={msg.attachmentUrl} 
-                    alt="attachment" 
-                    className="rounded-lg mb-2 max-w-full h-auto cursor-pointer hover:opacity-90"
-                    onClick={() => window.open(msg.attachmentUrl, '_blank')}
-                  />
+                  <div className="mb-3 overflow-hidden rounded-xl border border-white/20">
+                    <img 
+                      src={msg.attachmentUrl} 
+                      alt="attachment" 
+                      className="max-w-full h-auto cursor-pointer hover:scale-105 transition-transform"
+                      onClick={() => window.open(msg.attachmentUrl, '_blank')}
+                    />
+                  </div>
                 )}
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
-                <p className={`text-[10px] mt-1 text-right ${isMe ? 'text-blue-100' : 'text-gray-400'}`}>
+                <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                <div className={`text-[10px] mt-2 flex justify-end items-center gap-1 ${isMe ? 'text-blue-100' : 'text-gray-400'}`}>
                   {formatTime(msg.timestamp)}
-                </p>
+                </div>
               </div>
+              {isMe && (
+                <div className="w-4 h-4 rounded-full bg-blue-100 border-2 border-white shadow-sm"></div>
+              )}
             </div>
           );
         })}
@@ -103,26 +113,26 @@ const CustomerChat = () => {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 text-red-600 px-4 py-2 text-xs text-center border-t">
+        <div className="bg-red-50 text-red-600 px-4 py-2 text-xs text-center border-t border-red-100">
           {error}
         </div>
       )}
 
       {/* Input Area */}
-      <div className="bg-white p-4 border-t">
+      <div className="bg-white p-6 border-t border-gray-100">
         {filePreview && (
-          <div className="relative inline-block mb-2">
-            <img src={filePreview} alt="preview" className="h-20 w-20 object-cover rounded-lg border" />
+          <div className="relative inline-block mb-4">
+            <img src={filePreview} alt="preview" className="h-24 w-24 object-cover rounded-2xl border-2 border-blue-50 shadow-lg" />
             <button 
               onClick={() => { setSelectedFile(null); setFilePreview(null); }}
-              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600"
+              className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-1.5 shadow-xl hover:bg-red-600 transition-all hover:scale-110"
             >
-              <FaTimes size={10} />
+              <FaTimes size={12} />
             </button>
           </div>
         )}
         
-        <form onSubmit={handleSend} className="flex items-center gap-2">
+        <form onSubmit={handleSend} className="flex items-center gap-3 bg-gray-50 p-2 rounded-[32px] border border-gray-200 shadow-inner">
           <input 
             type="file" 
             accept="image/*" 
@@ -133,7 +143,7 @@ const CustomerChat = () => {
           <button 
             type="button"
             onClick={() => fileInputRef.current.click()}
-            className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-3 text-gray-400 hover:text-blue-600 hover:bg-white rounded-full transition-all shadow-sm"
           >
             <FaPaperclip size={20} />
           </button>
@@ -142,15 +152,17 @@ const CustomerChat = () => {
             type="text" 
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            placeholder="Write a message..."
+            className="flex-1 bg-transparent border-none px-2 py-3 focus:outline-none focus:ring-0 text-[15px] text-gray-700"
           />
           
           <button 
             type="submit"
             disabled={loading || (!inputText.trim() && !selectedFile)}
-            className={`p-3 bg-blue-600 text-white rounded-full transition-all ${
-              loading || (!inputText.trim() && !selectedFile) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700 shadow-md hover:scale-105'
+            className={`p-4 bg-blue-600 text-white rounded-full transition-all flex items-center justify-center shadow-lg ${
+              loading || (!inputText.trim() && !selectedFile) 
+                ? 'opacity-40 cursor-not-allowed grayscale' 
+                : 'hover:bg-blue-700 hover:shadow-blue-200 active:scale-95'
             }`}
           >
             {loading ? (
