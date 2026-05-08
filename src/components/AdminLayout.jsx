@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, MapPin, Calendar, LogOut, Settings, Shield } from 'lucide-react';
+import { LayoutDashboard, Users, MapPin, Calendar, LogOut, Settings, Shield, MessageSquare } from 'lucide-react';
 import { auth } from '../firebase/config';
 import { signOut } from 'firebase/auth';
 
@@ -18,6 +18,7 @@ const AdminLayout = () => {
     { name: 'All Bookings', path: '/admin/bookings', icon: <Calendar size={20} /> },
     { name: 'Manage AMC', path: '/admin/amc', icon: <Shield size={20} /> },
     { name: 'Customers', path: '/admin/customers', icon: <Users size={20} /> },
+    { name: 'Customer Chats', path: '/admin/chats', icon: <MessageSquare size={20} /> },
     { name: 'Addresses', path: '/admin/addresses', icon: <MapPin size={20} /> },
     { name: 'Settings', path: '/admin/settings', icon: <Settings size={20} /> },
   ];

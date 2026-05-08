@@ -18,6 +18,7 @@ import ManageAMC from './pages/customer/ManageAMC';
 import ManageAddresses from './pages/customer/ManageAddresses';
 import BookService from './pages/customer/BookService';
 import BookInstallation from './pages/customer/BookInstallation';
+import CustomerChat from './pages/customer/CustomerChat';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -26,6 +27,7 @@ import AdminAllBookings from './pages/admin/AdminAllBookings';
 import AdminManageAMC from './pages/admin/AdminManageAMC';
 import AdminCustomers from './pages/admin/AdminCustomers';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminChats from './pages/admin/AdminChats';
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const { currentUser, userData, loading } = useAuth();
@@ -62,6 +64,7 @@ function App() {
             <Route path="addresses" element={<ManageAddresses />} />
             <Route path="book-service" element={<BookService />} />
             <Route path="book-installation" element={<BookInstallation />} />
+            <Route path="chat" element={<CustomerChat />} />
           </Route>
 
           {/* Admin Routes */}
@@ -76,6 +79,7 @@ function App() {
             <Route path="amc" element={<AdminManageAMC />} />
             <Route path="customers" element={<AdminCustomers />} />
             <Route path="settings" element={<AdminSettings />} />
+            <Route path="chats" element={<AdminChats />} />
           </Route>
         </Routes>
       </BrowserRouter>

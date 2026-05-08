@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Wrench, MapPin, Clock, ArrowRight, Hammer } from 'lucide-react';
+import { Wrench, MapPin, Clock, ArrowRight, Hammer, MessageSquare } from 'lucide-react';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 
@@ -80,6 +80,19 @@ const CustomerDashboard = () => {
           <p>Manage your installed locations and devices.</p>
           <Link to="/customer/addresses" className="btn btn-outline" style={{ width: '100%', marginTop: '16px' }}>
             View Addresses <ArrowRight size={16} />
+          </Link>
+        </div>
+
+        <div className="glass-panel" style={{ padding: '24px' }}>
+          <div className="flex justify-between items-center mb-4">
+            <div style={{ background: 'rgba(253, 203, 110, 0.2)', padding: '12px', borderRadius: '12px', color: '#fdcb6e' }}>
+              <MessageSquare size={24} />
+            </div>
+          </div>
+          <h3>Support Chat</h3>
+          <p>Chat with our experts for immediate assistance.</p>
+          <Link to="/customer/chat" className="btn btn-outline" style={{ width: '100%', marginTop: '16px' }}>
+            Chat Now <ArrowRight size={16} />
           </Link>
         </div>
       </div>
