@@ -4,6 +4,7 @@ import { collection, query, where, getDocs, addDoc, orderBy } from 'firebase/fir
 import { db } from '../../firebase/config';
 import { Shield, ShieldAlert, CheckCircle, Clock, Info, Hammer, Wrench, Calendar, FileText, ChevronRight, AlertCircle, X, MapPin, ShieldCheck } from 'lucide-react';
 import InvoiceGenerator from '../../utils/InvoiceGenerator';
+import { isAmcExpired } from '../../utils/AmcUtils';
 
 const ManageAMC = () => {
   const { currentUser, userData } = useAuth();
@@ -195,26 +196,26 @@ const ManageAMC = () => {
             {myAmcs.map(amc => {
               const amcBookings = bookings.filter(b => b.amcId === amc.id);
               const isApproved = amc.status === 'Approved';
-              const isExpired = amc.status === 'Expired';
+              const expired = isAmcExpired(amc);
               
               return (
                 <div key={amc.id} className="glass-panel" style={{ 
                   padding: 0, 
                   overflow: 'hidden',
-                  background: isApproved ? 'rgba(0, 206, 201, 0.05)' : 'rgba(255,255,255,0.02)',
-                  border: isApproved ? '1px solid rgba(0, 206, 201, 0.1)' : 'var(--glass-border)'
+                  background: isApproved && !expired ? 'rgba(0, 206, 201, 0.05)' : 'rgba(255,255,255,0.02)',
+                  border: isApproved && !expired ? '1px solid rgba(0, 206, 201, 0.1)' : 'var(--glass-border)'
                 }}>
                   <div style={{ padding: '24px' }}>
                     <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
                       <div className="flex gap-4">
-                        <div style={{ background: isApproved ? 'rgba(0, 206, 201, 0.1)' : 'rgba(255,255,255,0.05)', padding: '16px', borderRadius: '16px' }}>
-                          <Shield size={24} color={isApproved ? 'var(--color-secondary)' : 'var(--text-muted)'} />
+                        <div style={{ background: isApproved && !expired ? 'rgba(0, 206, 201, 0.1)' : 'rgba(255,255,255,0.05)', padding: '16px', borderRadius: '16px' }}>
+                          <Shield size={24} color={isApproved && !expired ? 'var(--color-secondary)' : 'var(--text-muted)'} />
                         </div>
                         <div>
                           <div className="flex items-center gap-3">
                             <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{amc.packageName}</h3>
-                            <span className={`tag ${isApproved ? 'tag-success' : 'tag-warning'}`} style={{ fontSize: '0.65rem' }}>
-                              {amc.status}
+                            <span className={`tag ${expired ? 'tag-danger' : (isApproved ? 'tag-success' : 'tag-warning')}`} style={{ fontSize: '0.65rem' }}>
+                              {expired ? 'Expired' : amc.status}
                             </span>
                           </div>
                           <div className="flex items-center gap-2 mt-1 text-sm text-secondary">
@@ -234,14 +235,14 @@ const ManageAMC = () => {
                         <div className="flex flex-col items-center justify-center p-4">
                           <span className="text-xs text-muted mb-2 uppercase font-bold">Breakdown Visits</span>
                           <div className="flex items-baseline gap-1">
-                            <span style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--color-secondary)' }}>{amc.breakdownVisitsLeft}</span>
+                            <span style={{ fontSize: '2rem', fontWeight: 900, color: expired && amc.breakdownVisitsLeft <= 0 ? 'var(--text-muted)' : 'var(--color-secondary)' }}>{amc.breakdownVisitsLeft}</span>
                             <span className="text-muted">/ {amc.maxBreakdownVisits}</span>
                           </div>
                         </div>
                         <div className="flex flex-col items-center justify-center p-4 border-l border-white-5">
                           <span className="text-xs text-muted mb-2 uppercase font-bold">Maintenance Visits</span>
                           <div className="flex items-baseline gap-1">
-                            <span style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--color-primary-light)' }}>{amc.maintenanceVisitsLeft}</span>
+                            <span style={{ fontSize: '2rem', fontWeight: 900, color: expired && amc.maintenanceVisitsLeft <= 0 ? 'var(--text-muted)' : 'var(--color-primary-light)' }}>{amc.maintenanceVisitsLeft}</span>
                             <span className="text-muted">/ {amc.maxMaintenanceVisits}</span>
                           </div>
                         </div>
@@ -251,8 +252,14 @@ const ManageAMC = () => {
                     <div className="mt-6 flex flex-wrap justify-between items-center gap-4">
                       <div className="flex gap-6">
                         <div className="flex flex-col">
+                          <span className="text-xs text-muted">Purchased on</span>
+                          <span className="text-sm font-bold">{formatDate(amc.purchaseDate)}</span>
+                        </div>
+                        <div className="flex flex-col">
                           <span className="text-xs text-muted">Validity Upto</span>
-                          <span className="text-sm font-bold">{formatDate(amc.validityUpto)}</span>
+                          <span className="text-sm font-bold" style={{ color: expired && amc.validityUpto < Date.now() ? '#ff7675' : 'inherit' }}>
+                            {formatDate(amc.validityUpto)}
+                          </span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-xs text-muted">Cameras</span>
@@ -267,7 +274,7 @@ const ManageAMC = () => {
                         >
                           <FileText size={16} /> Invoice
                         </button>
-                        {isExpired && (
+                        {expired && (
                           <button onClick={() => setBuyingPackage(packages.find(p => p.id === amc.packageId))} className="btn btn-primary btn-sm">
                             Renew Now
                           </button>

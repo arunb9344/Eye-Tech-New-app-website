@@ -1,9 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, updateDoc, doc, addDoc, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { ShieldCheck, Plus, X, Users, Settings } from 'lucide-react';
+import { ShieldCheck, Plus, X, Users, Settings, Clock, AlertTriangle } from 'lucide-react';
+import { isAmcExpired, getExpiryReason } from '../../utils/AmcUtils';
 
 const AdminManageAMC = () => {
+  const formatDate = (ts) => {
+    if (!ts) return 'N/A';
+    try {
+      const date = new Date(ts);
+      if (isNaN(date.getTime())) return 'N/A';
+      return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    } catch (e) {
+      return 'N/A';
+    }
+  };
   const [packages, setPackages] = useState([]);
   const [customerAmcs, setCustomerAmcs] = useState([]);
   const [allBookings, setAllBookings] = useState([]);
@@ -182,13 +193,14 @@ const AdminManageAMC = () => {
         )}
       </div>
 
-      <div className="flex gap-4 mb-8" style={{ borderBottom: 'var(--glass-border)', paddingBottom: '16px' }}>
-        {['Approvals', 'Active Subscriptions', 'Packages'].map(tab => (
+      <div className="flex gap-4 mb-8" style={{ borderBottom: 'var(--glass-border)', paddingBottom: '16px', overflowX: 'auto' }}>
+        {['Approvals', 'Active Subscriptions', 'Expired Subscriptions', 'Packages'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             style={{
               background: 'transparent', border: 'none', padding: '8px 16px',
+              whiteSpace: 'nowrap',
               color: activeTab === tab ? 'var(--text-primary)' : 'var(--text-secondary)',
               borderBottom: activeTab === tab ? '2px solid var(--color-primary-light)' : '2px solid transparent',
               cursor: 'pointer', fontWeight: activeTab === tab ? 600 : 400, fontSize: '1rem', transition: 'var(--transition)'
@@ -301,14 +313,21 @@ const AdminManageAMC = () => {
             </div>
           )}
 
-          {activeTab === 'Active Subscriptions' && (
+          {(activeTab === 'Active Subscriptions' || activeTab === 'Expired Subscriptions') && (
             <div className="flex-col gap-4">
               {!selectedAmc ? (
                 <>
                   {/* Group AMCs by User to "List all customers" */}
                   {Object.entries(
                     customerAmcs
-                      .filter(a => a.status === 'Approved')
+                      .filter(a => {
+                        const expired = isAmcExpired(a);
+                        if (activeTab === 'Active Subscriptions') {
+                          return a.status === 'Approved' && !expired;
+                        } else {
+                          return (a.status === 'Approved' && expired) || a.status === 'Expired';
+                        }
+                      })
                       .reduce((acc, amc) => {
                         if (!acc[amc.userId]) acc[amc.userId] = { name: amc.userName, phone: amc.userPhone, amcs: [] };
                         acc[amc.userId].amcs.push(amc);
@@ -338,7 +357,10 @@ const AdminManageAMC = () => {
                             style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
                           >
                             <div>
-                              <p style={{ margin: 0, fontWeight: 500 }}>{amc.packageName}</p>
+                              <div className="flex items-center gap-2">
+                                <p style={{ margin: 0, fontWeight: 500 }}>{amc.packageName}</p>
+                                {isAmcExpired(amc) && <span className="tag tag-danger" style={{ fontSize: '0.6rem', padding: '1px 6px' }}>Expired</span>}
+                              </div>
                               <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>{amc.addressName}</p>
                             </div>
                             <div className="text-right">
@@ -352,8 +374,19 @@ const AdminManageAMC = () => {
                       </div>
                     </div>
                   ))}
-                  {customerAmcs.filter(a => a.status === 'Approved').length === 0 && (
-                    <p style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>No active subscriptions found.</p>
+                  {Object.keys(
+                    customerAmcs.filter(a => {
+                      const expired = isAmcExpired(a);
+                      if (activeTab === 'Active Subscriptions') {
+                        return a.status === 'Approved' && !expired;
+                      } else {
+                        return (a.status === 'Approved' && expired) || a.status === 'Expired';
+                      }
+                    })
+                  ).length === 0 && (
+                    <p style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                      No {activeTab === 'Active Subscriptions' ? 'active' : 'expired'} subscriptions found.
+                    </p>
                   )}
                 </>
               ) : (
@@ -364,9 +397,24 @@ const AdminManageAMC = () => {
                   
                   <div className="flex flex-col md:flex-row justify-between gap-8">
                     <div style={{ flex: 1 }}>
-                      <h2 style={{ margin: '0 0 4px 0' }}>{selectedAmc.userName}</h2>
+                      <div className="flex items-center gap-4 mb-4">
+                        <h2 style={{ margin: 0 }}>{selectedAmc.userName}</h2>
+                        <span className={`tag ${isAmcExpired(selectedAmc) ? 'tag-danger' : 'tag-success'}`}>
+                          {isAmcExpired(selectedAmc) ? 'Expired' : 'Active'}
+                        </span>
+                      </div>
                       <h3 style={{ color: 'var(--color-primary-light)', margin: '0 0 24px 0' }}>{selectedAmc.packageName}</h3>
                       
+                      {isAmcExpired(selectedAmc) && (
+                        <div className="p-4 rounded-xl mb-6 flex items-center gap-3" style={{ background: 'rgba(255, 118, 117, 0.1)', border: '1px solid rgba(255, 118, 117, 0.2)' }}>
+                          <AlertTriangle color="#ff7675" size={20} />
+                          <div>
+                            <p style={{ margin: 0, color: '#ff7675', fontWeight: 700, fontSize: '0.9rem' }}>Subscription Expired</p>
+                            <p style={{ margin: 0, color: 'rgba(255, 118, 117, 0.8)', fontSize: '0.8rem' }}>Reason: {getExpiryReason(selectedAmc)}</p>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="grid-2x2 gap-6">
                         <div>
                           <p className="detail-label" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '4px' }}>Phone</p>
@@ -381,12 +429,18 @@ const AdminManageAMC = () => {
                           <p style={{ fontWeight: 500 }}>{selectedAmc.fullAddress || selectedAmc.addressDetails?.street}, {selectedAmc.pincode || selectedAmc.addressDetails?.city}</p>
                         </div>
                         <div>
-                          <p className="detail-label" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '4px' }}>Total Amount</p>
-                          <p style={{ fontWeight: 700, color: 'var(--color-secondary)', fontSize: '1.2rem' }}>₹{selectedAmc.totalAmount || selectedAmc.totalPrice}</p>
+                          <p className="detail-label" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '4px' }}>Purchase Date</p>
+                          <p style={{ fontWeight: 500 }}>{formatDate(selectedAmc.purchaseDate)}</p>
                         </div>
                         <div>
                           <p className="detail-label" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '4px' }}>Valid Upto</p>
-                          <p style={{ fontWeight: 500 }}>{selectedAmc.validityUpto ? new Date(selectedAmc.validityUpto).toLocaleDateString() : 'N/A'}</p>
+                          <p style={{ fontWeight: 500, color: isAmcExpired(selectedAmc) && selectedAmc.validityUpto < Date.now() ? '#ff7675' : 'inherit' }}>
+                            {formatDate(selectedAmc.validityUpto)}
+                          </p>
+                        </div>
+                        <div style={{ gridColumn: '1 / -1' }}>
+                          <p className="detail-label" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '4px' }}>Total Amount</p>
+                          <p style={{ fontWeight: 700, color: 'var(--color-secondary)', fontSize: '1.2rem' }}>₹{selectedAmc.totalAmount || selectedAmc.totalPrice}</p>
                         </div>
                       </div>
                     </div>
@@ -394,13 +448,13 @@ const AdminManageAMC = () => {
                     <div style={{ flex: 1, borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '32px' }}>
                       <h4 className="mb-4">Visit Status</h4>
                       <div className="flex gap-4 mb-8">
-                        <div className="glass-panel" style={{ flex: 1, padding: '16px', textAlign: 'center', background: 'rgba(229, 115, 115, 0.1)' }}>
-                          <p style={{ margin: 0, fontSize: '0.75rem', color: '#E57373' }}>Breakdown</p>
-                          <h3 style={{ margin: '4px 0', color: '#E57373' }}>{selectedAmc.breakdownVisitsLeft}/{selectedAmc.maxBreakdownVisits}</h3>
+                        <div className="glass-panel" style={{ flex: 1, padding: '16px', textAlign: 'center', background: selectedAmc.breakdownVisitsLeft <= 0 ? 'rgba(255,255,255,0.05)' : 'rgba(229, 115, 115, 0.1)' }}>
+                          <p style={{ margin: 0, fontSize: '0.75rem', color: selectedAmc.breakdownVisitsLeft <= 0 ? 'var(--text-muted)' : '#E57373' }}>Breakdown</p>
+                          <h3 style={{ margin: '4px 0', color: selectedAmc.breakdownVisitsLeft <= 0 ? 'var(--text-muted)' : '#E57373' }}>{selectedAmc.breakdownVisitsLeft}/{selectedAmc.maxBreakdownVisits}</h3>
                         </div>
-                        <div className="glass-panel" style={{ flex: 1, padding: '16px', textAlign: 'center', background: 'rgba(100, 181, 246, 0.1)' }}>
-                          <p style={{ margin: 0, fontSize: '0.75rem', color: '#64B5F6' }}>Maintenance</p>
-                          <h3 style={{ margin: '4px 0', color: '#64B5F6' }}>{selectedAmc.maintenanceVisitsLeft}/{selectedAmc.maxMaintenanceVisits}</h3>
+                        <div className="glass-panel" style={{ flex: 1, padding: '16px', textAlign: 'center', background: selectedAmc.maintenanceVisitsLeft <= 0 ? 'rgba(255,255,255,0.05)' : 'rgba(100, 181, 246, 0.1)' }}>
+                          <p style={{ margin: 0, fontSize: '0.75rem', color: selectedAmc.maintenanceVisitsLeft <= 0 ? 'var(--text-muted)' : '#64B5F6' }}>Maintenance</p>
+                          <h3 style={{ margin: '4px 0', color: selectedAmc.maintenanceVisitsLeft <= 0 ? 'var(--text-muted)' : '#64B5F6' }}>{selectedAmc.maintenanceVisitsLeft}/{selectedAmc.maxMaintenanceVisits}</h3>
                         </div>
                       </div>
                       
