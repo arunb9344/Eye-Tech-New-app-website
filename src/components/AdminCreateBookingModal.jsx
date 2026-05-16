@@ -4,6 +4,7 @@ import { db } from '../firebase/config';
 import { X, Search, Plus, MapPin, Wrench, Hammer, Zap, ShieldCheck, AlertTriangle, Info, ArrowRight } from 'lucide-react';
 
 const AdminCreateBookingModal = ({ isOpen, onClose, onBookingCreated }) => {
+  console.log("AdminCreateBookingModal rendered. isOpen:", isOpen);
   const [customers, setCustomers] = useState([]);
   const [addresses, setAddresses] = useState([]);
   const [purchasedAmcs, setPurchasedAmcs] = useState([]);
@@ -324,7 +325,6 @@ const AdminCreateBookingModal = ({ isOpen, onClose, onBookingCreated }) => {
                       setProduct(e.target.value);
                       setIssue('');
                     }}
-                    required
                     className="input-field"
                   >
                     <option value="" disabled>-- Select Product --</option>
@@ -341,7 +341,6 @@ const AdminCreateBookingModal = ({ isOpen, onClose, onBookingCreated }) => {
                     <select 
                       value={issue}
                       onChange={(e) => setIssue(e.target.value)}
-                      required
                       className="input-field"
                     >
                       <option value="" disabled>-- Select Issue --</option>
@@ -376,7 +375,6 @@ const AdminCreateBookingModal = ({ isOpen, onClose, onBookingCreated }) => {
                     min="1" 
                     value={numCameras}
                     onChange={(e) => setNumCameras(e.target.value)}
-                    required
                     className="input-field"
                     placeholder="e.g. 4"
                   />
@@ -398,9 +396,9 @@ const AdminCreateBookingModal = ({ isOpen, onClose, onBookingCreated }) => {
             <div className="flex justify-end gap-3 mt-4">
               <button type="button" onClick={onClose} className="btn btn-outline" disabled={submitting}>Cancel</button>
               <button 
-                type="submit" 
+                type="button" 
+                onClick={handleSubmit}
                 className="btn btn-primary flex items-center gap-2" 
-                disabled={submitting || !selectedAddressId}
               >
                 {submitting ? 'Creating...' : 'Create Booking'}
                 {!submitting && <ArrowRight size={18} />}

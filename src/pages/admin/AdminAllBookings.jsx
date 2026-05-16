@@ -237,6 +237,8 @@ const AdminAllBookings = () => {
     return true; // All
   });
 
+  console.log("AdminAllBookings rendering. showCreateModal:", showCreateModal);
+
   return (
     <div className="animate-fade-in" style={{ maxWidth: '1000px' }}>
       <div className="flex justify-between items-start mb-2">
@@ -245,7 +247,11 @@ const AdminAllBookings = () => {
           <p className="mb-8">View and process customer service and installation requests.</p>
         </div>
         <button 
-          onClick={() => setShowCreateModal(true)} 
+          onClick={() => {
+            alert("Create Booking button clicked!");
+            console.log("Create Booking clicked, setting showCreateModal to true");
+            setShowCreateModal(true);
+          }} 
           className="btn btn-primary flex items-center gap-2"
         >
           <Plus size={18} />
