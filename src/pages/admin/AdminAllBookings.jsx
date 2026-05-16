@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, updateDoc, doc, query, orderBy, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { Clock, Wrench, Hammer, Search, CheckCircle } from 'lucide-react';
+import { Clock, Wrench, Hammer, Search, CheckCircle, Plus } from 'lucide-react';
+import AdminCreateBookingModal from '../../components/AdminCreateBookingModal';
 
 const DetailItem = ({ label, value }) => {
   if (!value) return null;
@@ -17,6 +18,7 @@ const AdminAllBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('Pending');
+  const [showCreateModal, setShowCreateModal] = useState(false);
   
   // Action state
   const [actingOn, setActingOn] = useState(null);
@@ -237,8 +239,19 @@ const AdminAllBookings = () => {
 
   return (
     <div className="animate-fade-in" style={{ maxWidth: '1000px' }}>
-      <h2 className="mb-2">Manage Bookings</h2>
-      <p className="mb-8">View and process customer service and installation requests.</p>
+      <div className="flex justify-between items-start mb-2">
+        <div>
+          <h2 className="mb-2">Manage Bookings</h2>
+          <p className="mb-8">View and process customer service and installation requests.</p>
+        </div>
+        <button 
+          onClick={() => setShowCreateModal(true)} 
+          className="btn btn-primary flex items-center gap-2"
+        >
+          <Plus size={18} />
+          Create Booking
+        </button>
+      </div>
 
       {/* Tabs */}
       <div className="flex gap-4 mb-8" style={{ borderBottom: 'var(--glass-border)', paddingBottom: '16px', overflowX: 'auto' }}>
@@ -672,6 +685,15 @@ const AdminAllBookings = () => {
           ))}
         </div>
       )}
+
+      <AdminCreateBookingModal 
+        isOpen={showCreateModal} 
+        onClose={() => setShowCreateModal(false)}
+        onBookingCreated={() => {
+          setShowCreateModal(false);
+          fetchBookings();
+        }}
+      />
     </div>
   );
 };
