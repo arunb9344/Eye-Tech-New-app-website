@@ -17,11 +17,11 @@ const LandingPage = () => {
       <div style={{ backgroundColor: '#0f172a', color: '#ffffff', padding: '10px 20px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'between', alignItems: 'center', fontSize: '12px' }}>
           <div style={{ display: 'flex', gap: '24px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Phone size={14} color="#60a5fa" /> +91 98765 43210</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Mail size={14} color="#60a5fa" /> contact@eyetechsecurities.in</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Phone size={14} color="#60a5fa" /> +91 99628 35944</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Mail size={14} color="#60a5fa" /> support@eyetechsecurities.in</span>
           </div>
           <div style={{ display: 'flex', gap: '16px', marginLeft: 'auto' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><MapPin size={14} color="#60a5fa" /> Bangalore, India</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><MapPin size={14} color="#60a5fa" /> Nanganallur, Chennai</span>
           </div>
         </div>
       </div>
@@ -191,6 +191,24 @@ const LandingPage = () => {
             </div>
 
             <div>
+              <h5 style={{ fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#64748b', marginBottom: '32px' }}>Contact</h5>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <li style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', color: '#94a3b8', fontSize: '14px' }}>
+                  <MapPin size={14} color="#60a5fa" style={{ marginTop: '3px', flexShrink: 0 }} />
+                  <span>Door No:01, Shop No:02 Ground Floor,<br />15th St, Nehru Colony, Nanganallur,<br />Chennai, Tamil Nadu 600061</span>
+                </li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#94a3b8', fontSize: '14px' }}>
+                  <Phone size={14} color="#60a5fa" />
+                  <a href="tel:+919962835944" style={{ color: '#94a3b8', textDecoration: 'none' }}>+91 99628 35944</a>
+                </li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#94a3b8', fontSize: '14px' }}>
+                  <Mail size={14} color="#60a5fa" />
+                  <a href="mailto:support@eyetechsecurities.in" style={{ color: '#94a3b8', textDecoration: 'none' }}>support@eyetechsecurities.in</a>
+                </li>
+              </ul>
+            </div>
+
+            <div>
               <h5 style={{ fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#64748b', marginBottom: '32px' }}>Company</h5>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <li><Link to="/contact" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '14px' }}>Contact Us</Link></li>
@@ -201,7 +219,7 @@ const LandingPage = () => {
           </div>
           
           <div style={{ borderTop: '1px solid #1e293b', paddingTop: '40px', textAlign: 'center', color: '#64748b', fontSize: '12px', fontWeight: 700 }}>
-            &copy; {new Date().getFullYear()} Eye Tech Securities. All rights reserved.
+            &copy; {new Date().getFullYear()} Eye Tech Securities. All rights reserved. | DIGIPIN: 4T3-22P-3KK2
           </div>
         </div>
       </footer>

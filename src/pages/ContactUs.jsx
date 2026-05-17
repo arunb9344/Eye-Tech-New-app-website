@@ -41,7 +41,7 @@ const ContactUs = () => {
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 uppercase font-bold tracking-widest">Call Us</p>
-                  <p className="text-lg font-bold">+91 98765 43210</p>
+                  <p className="text-lg font-bold">+91 99628 35944</p>
                   <p className="text-sm text-gray-500">Mon-Sat, 9am-7pm</p>
                 </div>
               </div>
@@ -52,7 +52,7 @@ const ContactUs = () => {
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 uppercase font-bold tracking-widest">Email Us</p>
-                  <p className="text-lg font-bold">info@eyetechsecurities.in</p>
+                  <p className="text-lg font-bold">support@eyetechsecurities.in</p>
                   <p className="text-sm text-gray-500">We reply within 24 hours</p>
                 </div>
               </div>
@@ -63,8 +63,9 @@ const ContactUs = () => {
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 uppercase font-bold tracking-widest">Visit Us</p>
-                  <p className="text-lg font-bold">Eye Tech Securities HQ</p>
-                  <p className="text-sm text-gray-500">Electronic City, Bangalore, India</p>
+                  <p className="text-lg font-bold">Eye Tech Securities</p>
+                  <p className="text-sm text-gray-500">Door No:01, Shop No:02 Ground Floor, 15th St,<br />Nehru Colony, Nanganallur, Chennai – 600061</p>
+                  <p className="text-xs text-gray-600 mt-1">DIGIPIN: 4T3-22P-3KK2</p>
                 </div>
               </div>
 
