@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, updateDoc, doc, query, orderBy, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { Clock, Wrench, Hammer, Search, CheckCircle } from 'lucide-react';
+import { Clock, Wrench, Hammer, Search, CheckCircle, Plus } from 'lucide-react';
+import AdminCreateBookingModal from '../../components/AdminCreateBookingModal';
+
 
 const DetailItem = ({ label, value }) => {
   if (!value) return null;
@@ -38,6 +40,17 @@ const AdminAllBookings = () => {
   // Scheduling state
   const [schedulingOn, setSchedulingOn] = useState(null);
   const [scheduledDateStr, setScheduledDateStr] = useState('');
+
+  // Date editing state
+  const [bookedOnDateStr, setBookedOnDateStr] = useState('');
+  const [completedOnDateStr, setCompletedOnDateStr] = useState('');
+  const [editingDatesOn, setEditingDatesOn] = useState(null); // booking.id for already-completed bookings
+  const [editBookedOnDateStr, setEditBookedOnDateStr] = useState('');
+  const [editCompletedOnDateStr, setEditCompletedOnDateStr] = useState('');
+
+  // Create Booking state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -76,16 +89,59 @@ const AdminAllBookings = () => {
     fetchBookings();
   }, []);
 
+  // Helper: convert yyyy-MM-dd string to midnight timestamp (ms)
+  const dateStrToTs = (str) => {
+    if (!str) return null;
+    const [y, m, d] = str.split('-');
+    return new Date(parseInt(y), parseInt(m) - 1, parseInt(d)).getTime();
+  };
+
+  // Helper: convert timestamp to yyyy-MM-dd string
+  const tsToDateStr = (ts) => {
+    if (!ts) return '';
+    const d = new Date(typeof ts === 'string' ? Date.parse(ts) : ts);
+    if (isNaN(d)) return '';
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  };
+
+  const handleEditDates = async (booking) => {
+    try {
+      const patch = {};
+      if (editBookedOnDateStr) {
+        patch.bookingDate = dateStrToTs(editBookedOnDateStr);
+        patch.createdAt = new Date(patch.bookingDate).toISOString();
+      }
+      if (editCompletedOnDateStr) {
+        patch.completionDate = dateStrToTs(editCompletedOnDateStr);
+        patch.completedAt = new Date(patch.completionDate).toISOString();
+      }
+      if (Object.keys(patch).length === 0) { setEditingDatesOn(null); return; }
+      await updateDoc(doc(db, 'bookings', booking.id), patch);
+      setEditingDatesOn(null);
+      fetchBookings();
+    } catch (err) {
+      console.error('Error updating dates', err);
+      alert('Failed to update dates.');
+    }
+  };
+
   const handleComplete = async (booking) => {
     try {
+      const completionTs = completedOnDateStr ? (dateStrToTs(completedOnDateStr) || Date.now()) : Date.now();
       const updateData = {
         status: 'Completed',
         completionDescription: workDescription,
         amountCharged: parseFloat(amountCharged) || 0,
         adminNotes: adminNotes,
-        completedAt: new Date().toISOString(),
-        completionDate: Date.now()
+        completedAt: new Date(completionTs).toISOString(),
+        completionDate: completionTs
       };
+      // Overwrite bookingDate if admin specified a custom booked-on date
+      if (bookedOnDateStr) {
+        const bookingTs = dateStrToTs(bookedOnDateStr);
+        updateData.bookingDate = bookingTs;
+        updateData.createdAt = new Date(bookingTs).toISOString();
+      }
 
       if (booking.type === 'Installation') {
         updateData.freeServicePeriod = freeServicePeriod;
@@ -138,6 +194,8 @@ const AdminAllBookings = () => {
       setGstNumber('');
       setInvoiceNumber('');
       setInvoiceDate('');
+      setBookedOnDateStr('');
+      setCompletedOnDateStr('');
       fetchBookings();
       
     } catch (err) {
@@ -237,8 +295,21 @@ const AdminAllBookings = () => {
 
   return (
     <div className="animate-fade-in" style={{ maxWidth: '1000px' }}>
-      <h2 className="mb-2">Manage Bookings</h2>
-      <p className="mb-8">View and process customer service and installation requests.</p>
+      <div className="flex justify-between items-start mb-2">
+        <div>
+          <h2 className="mb-2">Manage Bookings</h2>
+          <p className="mb-8">View and process customer service and installation requests.</p>
+        </div>
+        <button 
+          onClick={() => setIsCreateModalOpen(true)}
+          className="btn btn-primary flex items-center gap-2"
+          style={{ padding: '12px 24px', borderRadius: '16px' }}
+        >
+          <Plus size={20} />
+          Create Booking
+        </button>
+      </div>
+
 
       {/* Tabs */}
       <div className="flex gap-4 mb-8" style={{ borderBottom: 'var(--glass-border)', paddingBottom: '16px', overflowX: 'auto' }}>
@@ -339,7 +410,49 @@ const AdminAllBookings = () => {
                   flexDirection: 'column',
                   gap: '8px'
                 }}>
-                  <h4 style={{ margin: 0, color: 'var(--color-primary-light)', fontSize: '0.95rem', fontWeight: 700 }}>Completion Details</h4>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h4 style={{ margin: 0, color: 'var(--color-primary-light)', fontSize: '0.95rem', fontWeight: 700 }}>Completion Details</h4>
+                    <button
+                      onClick={() => {
+                        setEditingDatesOn(editingDatesOn === booking.id ? null : booking.id);
+                        setEditBookedOnDateStr(tsToDateStr(booking.bookingDate || booking.createdAt));
+                        setEditCompletedOnDateStr(tsToDateStr(booking.completionDate || booking.completedAt));
+                      }}
+                      style={{ background: 'none', border: '1px solid var(--glass-border-color, rgba(255,255,255,0.15))', borderRadius: '8px', padding: '4px 10px', fontSize: '0.78rem', color: 'var(--color-primary-light)', cursor: 'pointer' }}
+                    >
+                      ✏️ Edit Dates
+                    </button>
+                  </div>
+
+                  {editingDatesOn === booking.id && (
+                    <div style={{ background: 'rgba(255,255,255,0.04)', padding: '12px', borderRadius: '12px', border: '1px solid rgba(108,92,231,0.2)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Override booking dates — only filled fields will be updated.</p>
+                      <div>
+                        <label style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Booked on Date</label>
+                        <input
+                          type="date"
+                          className="input-field"
+                          value={editBookedOnDateStr}
+                          onChange={(e) => setEditBookedOnDateStr(e.target.value)}
+                          style={{ width: '100%', marginTop: '4px' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Completed on Date</label>
+                        <input
+                          type="date"
+                          className="input-field"
+                          value={editCompletedOnDateStr}
+                          onChange={(e) => setEditCompletedOnDateStr(e.target.value)}
+                          style={{ width: '100%', marginTop: '4px' }}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button onClick={() => setEditingDatesOn(null)} className="btn btn-outline" style={{ flex: 1, padding: '8px' }}>Cancel</button>
+                        <button onClick={() => handleEditDates(booking)} className="btn btn-primary" style={{ flex: 1, padding: '8px' }}>Save Dates</button>
+                      </div>
+                    </div>
+                  )}
                   
                   <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                     Completed on: {new Date(booking.completionDate || booking.completedAt).toLocaleString()}
@@ -476,6 +589,28 @@ const AdminAllBookings = () => {
                             rows="2"
                             value={adminNotes}
                             onChange={(e) => setAdminNotes(e.target.value)}
+                            style={{ width: '100%', marginTop: '4px' }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Booked on Date (Optional – override)</label>
+                          <input 
+                            type="date"
+                            className="input-field"
+                            value={bookedOnDateStr}
+                            onChange={(e) => setBookedOnDateStr(e.target.value)}
+                            style={{ width: '100%', marginTop: '4px' }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Completed on Date (Optional – override)</label>
+                          <input 
+                            type="date"
+                            className="input-field"
+                            value={completedOnDateStr}
+                            onChange={(e) => setCompletedOnDateStr(e.target.value)}
                             style={{ width: '100%', marginTop: '4px' }}
                           />
                         </div>
@@ -672,6 +807,12 @@ const AdminAllBookings = () => {
           ))}
         </div>
       )}
+      
+      <AdminCreateBookingModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)} 
+        onBookingCreated={fetchBookings} 
+      />
     </div>
   );
 };
