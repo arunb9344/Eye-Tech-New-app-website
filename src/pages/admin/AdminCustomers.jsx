@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../../firebase/config';
-import { Users, Trash2, AlertTriangle, X } from 'lucide-react';
+import { Users, Trash2, AlertTriangle, X, ShieldOff } from 'lucide-react';
 
 const AdminCustomers = () => {
   const [customers, setCustomers] = useState([]);
@@ -58,8 +59,18 @@ const AdminCustomers = () => {
         await deleteDoc(doc(db, 'purchased_amcs', amcDoc.id));
       }
 
-      // 4. Delete User Document
+      // 4. Delete Firestore user document
       await deleteDoc(doc(db, 'users', userId));
+
+      // 5. Delete Firebase Authentication account via Cloud Function
+      try {
+        const functions = getFunctions(undefined, 'asia-south1');
+        const deleteAuthUser = httpsCallable(functions, 'deleteUserAccount');
+        await deleteAuthUser({ uid: userId });
+      } catch (authErr) {
+        // Log but don't block — Firestore data is already cleaned up
+        console.warn('Auth deletion note:', authErr.message);
+      }
 
       // Refresh UI
       setCustomerToDelete(null);
@@ -133,9 +144,12 @@ const AdminCustomers = () => {
                 <li>All of their Pending Bookings</li>
                 <li>All of their Pending AMC requests</li>
                 <li>Their Customer Profile from the database</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                  <ShieldOff size={14} color="#ff7675" /> <strong>Their Firebase login account (Google / Email / Phone)</strong>
+                </li>
               </ul>
               <p style={{ margin: '8px 0 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                * Completed bookings and approved AMCs are retained for historical records. The user's Google/Email login auth account will remain, but they will lose access to the app.
+                * Completed bookings and approved AMCs are retained for records. This action cannot be undone.
               </p>
             </div>
 
