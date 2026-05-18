@@ -15,19 +15,32 @@ const Login = () => {
   const handleRoleRedirect = async (user) => {
     const docRef = doc(db, 'users', user.uid);
     const docSnap = await getDoc(docRef);
-    if (docSnap.exists() && docSnap.data().role === 'Admin') {
-      navigate('/admin/dashboard');
-    } else {
-      // If doesn't exist, create customer profile
-      if (!docSnap.exists()) {
-        await setDoc(docRef, {
-          email: user.email,
-          name: user.displayName || '',
-          role: 'Customer',
-          createdAt: new Date().toISOString()
-        });
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      // Profile incomplete if name or phone missing
+      const incomplete = !data.name || !data.phone || data.name.trim() === '';
+      if (incomplete) {
+        navigate('/complete-profile');
+        return;
       }
-      navigate('/customer/dashboard');
+      if (data.role === 'Admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/customer/dashboard');
+      }
+    } else {
+      // Brand new user — create doc and go to profile completion
+      await setDoc(docRef, {
+        uid: user.uid,
+        email: user.email || '',
+        name: user.displayName || '',
+        phone: '',
+        role: 'Customer',
+        profileComplete: false,
+        createdAt: new Date().toISOString(),
+      });
+      navigate('/complete-profile');
     }
   };
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
+import CompleteProfile from './pages/CompleteProfile';
 import LandingPage from './pages/LandingPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
@@ -29,13 +30,26 @@ import AdminCustomers from './pages/admin/AdminCustomers';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminChats from './pages/admin/AdminChats';
 
+// ProtectedRoute: checks auth + profile completion + role
 const ProtectedRoute = ({ children, allowedRole }) => {
-  const { currentUser, userData, loading } = useAuth();
+  const { currentUser, userData, loading, profileIncomplete } = useAuth();
 
-  if (loading) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
-  if (!currentUser) return <Navigate to="/login" />;
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#0f172a' }}>
+      <div style={{ width: '48px', height: '48px', border: '3px solid #2563eb', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+
+  // Not logged in → Login
+  if (!currentUser) return <Navigate to="/login" replace />;
+
+  // Profile incomplete → Complete Profile
+  if (profileIncomplete) return <Navigate to="/complete-profile" replace />;
+
+  // Wrong role → redirect to correct dashboard
   if (userData?.role !== allowedRole) {
-    return <Navigate to={userData?.role === 'Admin' ? '/admin/dashboard' : '/customer/dashboard'} />;
+    return <Navigate to={userData?.role === 'Admin' ? '/admin/dashboard' : '/customer/dashboard'} replace />;
   }
 
   return children;
@@ -46,12 +60,14 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* Public */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/complete-profile" element={<CompleteProfile />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/contact" element={<ContactUs />} />
-          <Route path="/" element={<LandingPage />} />
-          
+
           {/* Customer Routes */}
           <Route path="/customer/*" element={
             <ProtectedRoute allowedRole="Customer">
