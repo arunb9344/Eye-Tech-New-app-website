@@ -129,7 +129,7 @@ const BookService = () => {
   const info = getInfoDisplay();
 
   const getPossibleSolution = () => {
-    if (!isFreeServiceValid || !issue || product !== 'CCTV Camera') return null;
+    if (!issue || product !== 'CCTV Camera') return null;
     switch (issue) {
       case 'Beep Sound': return 'Restart Once & Check';
       case 'No PlayBack': return 'Check Live View Date & Time. If wrong kindly try changing.\nTry changing any other Adaptor for DVR & check';
