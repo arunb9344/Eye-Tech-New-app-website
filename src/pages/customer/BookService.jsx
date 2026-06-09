@@ -167,6 +167,7 @@ const BookService = () => {
         status: 'Pending',
         chargeType: chargeType || 'Chargeable',
         isEyeTechInstalled: !!selectedAddress.isEyeTechInstalled,
+        servicePrice: price || 0,
         amcId: applicableAmc?.id || null,
         bookingDate: Date.now(),
         // Add defaults for other model fields

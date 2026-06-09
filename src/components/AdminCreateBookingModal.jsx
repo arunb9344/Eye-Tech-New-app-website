@@ -181,12 +181,14 @@ export default function AdminCreateBookingModal({ isOpen, onClose, onBookingCrea
           product,
           issue,
           description: notes ? `Product: ${product}\nIssue: ${issue}\nNotes: ${notes}` : `Product: ${product}\nIssue: ${issue}`,
+          servicePrice: servicePrice || 0,
           amcId: applicableAmc?.id || null,
         });
       } else {
         Object.assign(base, {
           numberOfCameras: parseInt(numCameras) || 0,
           description: notes || '',
+          servicePrice: 0,
         });
       }
 

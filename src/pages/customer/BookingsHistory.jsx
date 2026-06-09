@@ -167,6 +167,7 @@ const BookingsHistory = () => {
                 <DetailItem label="Full Address" value={`${booking.addressName}\n${booking.fullAddress}`} />
                 <DetailItem label="Pincode" value={booking.pincode} />
                 {booking.type === 'Installation' && <DetailItem label="Cameras to Install" value={booking.noOfCameras || booking.numberOfCameras} />}
+                {booking.type === 'Service' && booking.servicePrice > 0 && <DetailItem label="Assigned Service Price" value={`₹${booking.servicePrice}`} />}
                 <DetailItem label="Your Notes" value={booking.description || 'No notes provided'} />
               </div>
 
