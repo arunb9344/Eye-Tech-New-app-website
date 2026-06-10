@@ -44,12 +44,30 @@ const AdminAllBookings = () => {
   // Date editing state
   const [bookedOnDateStr, setBookedOnDateStr] = useState('');
   const [completedOnDateStr, setCompletedOnDateStr] = useState('');
-  const [editingDatesOn, setEditingDatesOn] = useState(null); // booking.id for already-completed bookings
+  const [editingDatesOn, setEditingDatesOn] = useState(null);
   const [editBookedOnDateStr, setEditBookedOnDateStr] = useState('');
   const [editCompletedOnDateStr, setEditCompletedOnDateStr] = useState('');
 
   // Create Booking state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // ── Filter state ─────────────────────────────────────────────────────────
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterName, setFilterName] = useState('');
+  const [filterPhone, setFilterPhone] = useState('');
+  const [filterDateFrom, setFilterDateFrom] = useState('');
+  const [filterDateTo, setFilterDateTo] = useState('');
+
+  const filtersActive = filterName || filterPhone || filterDateFrom || filterDateTo;
+
+  const clearFilters = () => {
+    setFilterName(''); setFilterPhone('');
+    setFilterDateFrom(''); setFilterDateTo('');
+  };
+
+  // Unique sorted customer names for autocomplete
+  const allCustomerNames = [...new Set(bookings.map(b => b.userName).filter(Boolean))].sort();
+  // ─────────────────────────────────────────────────────────────────────────
 
 
   const fetchBookings = async () => {
@@ -287,10 +305,23 @@ const AdminAllBookings = () => {
   };
 
   const filteredBookings = bookings.filter(b => {
-    if (activeTab === 'Pending') return b.status === 'Pending' || b.status === 'Active' || b.status === 'In Progress';
-    if (activeTab === 'Completed') return b.status === 'Completed';
-    if (activeTab === 'Cancelled') return b.status === 'Cancelled';
-    return true; // All
+    // Tab filter
+    if (activeTab === 'Pending' && !(b.status === 'Pending' || b.status === 'Active' || b.status === 'In Progress')) return false;
+    if (activeTab === 'Completed' && b.status !== 'Completed') return false;
+    if (activeTab === 'Cancelled' && b.status !== 'Cancelled') return false;
+
+    // Search filters
+    if (filterName && !b.userName?.toLowerCase().includes(filterName.toLowerCase())) return false;
+    if (filterPhone && !b.userPhone?.includes(filterPhone)) return false;
+    if (filterDateFrom) {
+      const fromTs = new Date(filterDateFrom).setHours(0, 0, 0, 0);
+      if ((b.bookingDate || 0) < fromTs) return false;
+    }
+    if (filterDateTo) {
+      const toTs = new Date(filterDateTo).setHours(23, 59, 59, 999);
+      if ((b.bookingDate || 0) > toTs) return false;
+    }
+    return true;
   });
 
   return (
@@ -312,7 +343,7 @@ const AdminAllBookings = () => {
 
 
       {/* Tabs */}
-      <div className="flex gap-4 mb-8" style={{ borderBottom: 'var(--glass-border)', paddingBottom: '16px', overflowX: 'auto' }}>
+      <div className="flex gap-4 mb-4" style={{ borderBottom: 'var(--glass-border)', paddingBottom: '16px', overflowX: 'auto' }}>
         {['Pending', 'Completed', 'Cancelled', 'All'].map(tab => (
           <button
             key={tab}
@@ -333,6 +364,127 @@ const AdminAllBookings = () => {
           </button>
         ))}
       </div>
+
+      {/* Filter toggle bar */}
+      <div className="flex items-center gap-3 mb-4" style={{ flexWrap: 'wrap' }}>
+        <button
+          onClick={() => setShowFilters(f => !f)}
+          style={{
+            background: 'var(--glass-bg)',
+            border: `1px solid ${filtersActive ? 'var(--color-primary-light)' : 'var(--glass-border-color)'}`,
+            borderRadius: '20px',
+            padding: '6px 16px',
+            cursor: 'pointer',
+            color: filtersActive ? 'var(--color-primary-light)' : 'var(--text-secondary)',
+            fontWeight: 600,
+            fontSize: '0.9rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+          }}
+        >
+          <Search size={14} />
+          {showFilters ? '▲ Filters' : '▼ Filters'}
+        </button>
+        {filtersActive && (
+          <>
+            <span style={{
+              background: 'rgba(108,92,231,0.15)',
+              color: 'var(--color-primary-light)',
+              borderRadius: '20px', padding: '4px 12px',
+              fontSize: '0.8rem', fontWeight: 700
+            }}>Active</span>
+            <button
+              onClick={clearFilters}
+              style={{
+                background: 'transparent', border: 'none',
+                color: 'var(--color-error, #e74c3c)',
+                cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600
+              }}
+            >✕ Clear Filters</button>
+          </>
+        )}
+        <span style={{ marginLeft: 'auto', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+          {filteredBookings.length} results
+        </span>
+      </div>
+
+      {/* Collapsible filter panel */}
+      {showFilters && (
+        <div className="glass-panel mb-6" style={{ padding: '20px', borderRadius: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            {/* Name autocomplete */}
+            <div>
+              <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Filter by Name</label>
+              <input
+                type="text"
+                list="booking-names-list"
+                placeholder="Type customer name…"
+                value={filterName}
+                onChange={e => setFilterName(e.target.value)}
+                style={{
+                  width: '100%', padding: '10px 14px', borderRadius: '10px',
+                  border: '1px solid var(--glass-border-color)',
+                  background: 'var(--glass-bg)', color: 'var(--text-primary)',
+                  fontSize: '0.95rem', boxSizing: 'border-box'
+                }}
+              />
+              <datalist id="booking-names-list">
+                {allCustomerNames.map(name => <option key={name} value={name} />)}
+              </datalist>
+            </div>
+
+            {/* Phone filter */}
+            <div>
+              <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Filter by Phone</label>
+              <input
+                type="tel"
+                placeholder="Enter phone number…"
+                value={filterPhone}
+                onChange={e => setFilterPhone(e.target.value)}
+                style={{
+                  width: '100%', padding: '10px 14px', borderRadius: '10px',
+                  border: '1px solid var(--glass-border-color)',
+                  background: 'var(--glass-bg)', color: 'var(--text-primary)',
+                  fontSize: '0.95rem', boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* Date From */}
+            <div>
+              <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Booked From</label>
+              <input
+                type="date"
+                value={filterDateFrom}
+                onChange={e => setFilterDateFrom(e.target.value)}
+                style={{
+                  width: '100%', padding: '10px 14px', borderRadius: '10px',
+                  border: '1px solid var(--glass-border-color)',
+                  background: 'var(--glass-bg)', color: 'var(--text-primary)',
+                  fontSize: '0.95rem', boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* Date To */}
+            <div>
+              <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Booked To</label>
+              <input
+                type="date"
+                value={filterDateTo}
+                onChange={e => setFilterDateTo(e.target.value)}
+                style={{
+                  width: '100%', padding: '10px 14px', borderRadius: '10px',
+                  border: '1px solid var(--glass-border-color)',
+                  background: 'var(--glass-bg)', color: 'var(--text-primary)',
+                  fontSize: '0.95rem', boxSizing: 'border-box'
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <p>Loading bookings...</p>
