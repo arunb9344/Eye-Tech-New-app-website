@@ -51,18 +51,36 @@ const AdminAllBookings = () => {
   // Create Booking state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // ── Filter state ─────────────────────────────────────────────────────────
+  // ── Filter state (draft = user input; applied = what actually filters) ──────
   const [showFilters, setShowFilters] = useState(false);
-  const [filterName, setFilterName] = useState('');
-  const [filterPhone, setFilterPhone] = useState('');
-  const [filterDateFrom, setFilterDateFrom] = useState('');
-  const [filterDateTo, setFilterDateTo] = useState('');
 
-  const filtersActive = filterName || filterPhone || filterDateFrom || filterDateTo;
+  // Draft state — what the user is typing/selecting in the panel
+  const [draftName, setDraftName] = useState('');
+  const [draftPhone, setDraftPhone] = useState('');
+  const [draftDateFrom, setDraftDateFrom] = useState('');
+  const [draftDateTo, setDraftDateTo] = useState('');
+
+  // Applied state — only updated when Search is clicked
+  const [appliedName, setAppliedName] = useState('');
+  const [appliedPhone, setAppliedPhone] = useState('');
+  const [appliedDateFrom, setAppliedDateFrom] = useState('');
+  const [appliedDateTo, setAppliedDateTo] = useState('');
+
+  const filtersActive = appliedName || appliedPhone || appliedDateFrom || appliedDateTo;
+
+  const handleSearch = () => {
+    setAppliedName(draftName);
+    setAppliedPhone(draftPhone);
+    setAppliedDateFrom(draftDateFrom);
+    setAppliedDateTo(draftDateTo);
+    setShowFilters(false);
+  };
 
   const clearFilters = () => {
-    setFilterName(''); setFilterPhone('');
-    setFilterDateFrom(''); setFilterDateTo('');
+    setDraftName(''); setDraftPhone('');
+    setDraftDateFrom(''); setDraftDateTo('');
+    setAppliedName(''); setAppliedPhone('');
+    setAppliedDateFrom(''); setAppliedDateTo('');
   };
 
   // Unique sorted customer names for autocomplete
@@ -310,15 +328,15 @@ const AdminAllBookings = () => {
     if (activeTab === 'Completed' && b.status !== 'Completed') return false;
     if (activeTab === 'Cancelled' && b.status !== 'Cancelled') return false;
 
-    // Search filters
-    if (filterName && !b.userName?.toLowerCase().includes(filterName.toLowerCase())) return false;
-    if (filterPhone && !b.userPhone?.includes(filterPhone)) return false;
-    if (filterDateFrom) {
-      const fromTs = new Date(filterDateFrom).setHours(0, 0, 0, 0);
+    // Applied search filters (only active after Search is clicked)
+    if (appliedName && !b.userName?.toLowerCase().includes(appliedName.toLowerCase())) return false;
+    if (appliedPhone && !b.userPhone?.includes(appliedPhone)) return false;
+    if (appliedDateFrom) {
+      const fromTs = new Date(appliedDateFrom).setHours(0, 0, 0, 0);
       if ((b.bookingDate || 0) < fromTs) return false;
     }
-    if (filterDateTo) {
-      const toTs = new Date(filterDateTo).setHours(23, 59, 59, 999);
+    if (appliedDateTo) {
+      const toTs = new Date(appliedDateTo).setHours(23, 59, 59, 999);
       if ((b.bookingDate || 0) > toTs) return false;
     }
     return true;
@@ -413,15 +431,15 @@ const AdminAllBookings = () => {
       {showFilters && (
         <div className="glass-panel mb-6" style={{ padding: '20px', borderRadius: '16px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            {/* Name autocomplete */}
+            {/* Name autocomplete — draft */}
             <div>
               <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Filter by Name</label>
               <input
                 type="text"
                 list="booking-names-list"
                 placeholder="Type customer name…"
-                value={filterName}
-                onChange={e => setFilterName(e.target.value)}
+                value={draftName}
+                onChange={e => setDraftName(e.target.value)}
                 style={{
                   width: '100%', padding: '10px 14px', borderRadius: '10px',
                   border: '1px solid var(--glass-border-color)',
@@ -434,14 +452,14 @@ const AdminAllBookings = () => {
               </datalist>
             </div>
 
-            {/* Phone filter */}
+            {/* Phone filter — draft */}
             <div>
               <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Filter by Phone</label>
               <input
                 type="tel"
                 placeholder="Enter phone number…"
-                value={filterPhone}
-                onChange={e => setFilterPhone(e.target.value)}
+                value={draftPhone}
+                onChange={e => setDraftPhone(e.target.value)}
                 style={{
                   width: '100%', padding: '10px 14px', borderRadius: '10px',
                   border: '1px solid var(--glass-border-color)',
@@ -451,13 +469,13 @@ const AdminAllBookings = () => {
               />
             </div>
 
-            {/* Date From */}
+            {/* Date From — draft */}
             <div>
               <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Booked From</label>
               <input
                 type="date"
-                value={filterDateFrom}
-                onChange={e => setFilterDateFrom(e.target.value)}
+                value={draftDateFrom}
+                onChange={e => setDraftDateFrom(e.target.value)}
                 style={{
                   width: '100%', padding: '10px 14px', borderRadius: '10px',
                   border: '1px solid var(--glass-border-color)',
@@ -467,13 +485,13 @@ const AdminAllBookings = () => {
               />
             </div>
 
-            {/* Date To */}
+            {/* Date To — draft */}
             <div>
               <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Booked To</label>
               <input
                 type="date"
-                value={filterDateTo}
-                onChange={e => setFilterDateTo(e.target.value)}
+                value={draftDateTo}
+                onChange={e => setDraftDateTo(e.target.value)}
                 style={{
                   width: '100%', padding: '10px 14px', borderRadius: '10px',
                   border: '1px solid var(--glass-border-color)',
@@ -483,6 +501,19 @@ const AdminAllBookings = () => {
               />
             </div>
           </div>
+
+          {/* Search button */}
+          <button
+            onClick={handleSearch}
+            className="btn btn-primary"
+            style={{
+              width: '100%', marginTop: '16px',
+              padding: '12px', borderRadius: '12px',
+              fontWeight: 700, fontSize: '1rem'
+            }}
+          >
+            Search
+          </button>
         </div>
       )}
 
