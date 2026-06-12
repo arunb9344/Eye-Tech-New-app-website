@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { collection, query, where, getDocs, addDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { MapPin, Info, ArrowRight, CheckCircle, AlertTriangle, ShieldCheck, Plus, Zap } from 'lucide-react';
+import { MapPin, Info, ArrowRight, CheckCircle, AlertTriangle, ShieldCheck, Plus, Zap, X } from 'lucide-react';
 import AddressFormModal from '../../components/AddressFormModal';
 
 const BookService = () => {
@@ -202,41 +202,7 @@ const BookService = () => {
     }
   };
 
-  if (success) {
-    return (
-      <div className="animate-fade-in flex flex-col items-center justify-center" style={{ minHeight: '70vh' }}>
-        <div className="glass-panel" style={{ padding: '48px', textAlign: 'center', maxWidth: '500px', borderTop: '4px solid var(--color-secondary)' }}>
-          <div className="mb-6 flex justify-center">
-            <div style={{ background: 'rgba(0, 206, 201, 0.1)', padding: '20px', borderRadius: '50%' }}>
-              <CheckCircle size={64} color="var(--color-secondary)" />
-            </div>
-          </div>
-          <h2 className="mb-4">Service Booked!</h2>
-          <p className="mb-8" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            Your request for <strong>{selectedAddress?.label || selectedAddress?.name}</strong> has been submitted. 
-            Our admin team will review it and assign a technician shortly.
-          </p>
-          <div style={{ 
-            padding: '16px 24px', 
-            background: info.gradient, 
-            border: `1px solid ${info.border}`,
-            color: info.text, 
-            borderRadius: 'var(--radius-sm)', 
-            marginBottom: '32px', 
-            fontWeight: 700,
-            fontSize: '1.1rem',
-            letterSpacing: '0.5px',
-            textTransform: 'uppercase'
-          }}>
-            {chargeType}
-          </div>
-          <button onClick={() => window.location.href = '/customer/dashboard'} className="btn btn-primary" style={{ width: '100%', padding: '14px' }}>
-            Return to Dashboard
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Booking success modal popup is rendered at the bottom of the component
 
   return (
     <div className="animate-fade-in" style={{ maxWidth: '800px' }}>
@@ -399,6 +365,79 @@ const BookService = () => {
         onClose={() => setShowAddressModal(false)}
         onAddressSaved={handleAddressSaved}
       />
+
+      {success && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(10px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 2000, padding: '20px'
+        }}>
+          <div className="glass-panel animate-fade-in" style={{ 
+            width: '100%', maxWidth: '550px',
+            padding: '40px', position: 'relative',
+            background: 'rgba(30, 30, 50, 0.95)', border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+          }}>
+            {/* Close button at top right */}
+            <button 
+              onClick={() => window.location.href = '/customer/dashboard'} 
+              style={{
+                position: 'absolute', top: '20px', right: '20px',
+                background: 'none', border: 'none', color: 'var(--text-muted)',
+                cursor: 'pointer', padding: '8px', borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+            >
+              <X size={20} />
+            </button>
+
+            <div className="mb-6 flex justify-center">
+              <div style={{ background: 'rgba(0, 206, 201, 0.1)', padding: '20px', borderRadius: '50%' }}>
+                <CheckCircle size={56} color="var(--color-secondary)" />
+              </div>
+            </div>
+
+            <h3 className="mb-4 text-center" style={{ color: '#fff', fontSize: '1.6rem', fontWeight: 700 }}>
+              Booking Confirmed! 🎉
+            </h3>
+            
+            <div className="flex flex-col gap-4 text-left mb-8" style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '1rem' }}>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <div style={{ color: 'var(--color-secondary)', fontWeight: 'bold', minWidth: '15px' }}>✓</div>
+                <p style={{ margin: 0 }}>
+                  Your Service Request is booked successfully.
+                </p>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <div style={{ color: 'var(--color-secondary)', fontWeight: 'bold', minWidth: '15px' }}>✓</div>
+                <p style={{ margin: 0 }}>
+                  Technician will attend in <strong>2-7 days</strong>.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <div style={{ color: 'var(--color-secondary)', fontWeight: 'bold', minWidth: '15px' }}>✓</div>
+                <p style={{ margin: 0 }}>
+                  Minimum Visiting Charge is <strong>{chargeType === 'Free Service' || chargeType === 'AMC:Breakdown' ? '₹0 (Free / Covered under Warranty/AMC)' : `₹${price}`}</strong>. Any other Material replacement which is not under warranty, will be chargeable Extra. And Service Charges also may vary based on Work.
+                </p>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => window.location.href = '/customer/dashboard'} 
+              className="btn btn-primary" 
+              style={{ width: '100%', padding: '14px', fontWeight: 600, fontSize: '1.05rem' }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
